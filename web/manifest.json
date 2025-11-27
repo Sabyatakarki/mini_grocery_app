@@ -1,6 +1,6 @@
 {
-    "name": "mini_grocery_app",
-    "short_name": "mini_grocery_app",
+    "name": "mini_grocery",
+    "short_name": "mini_grocery",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

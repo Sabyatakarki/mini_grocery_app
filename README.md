@@ -1,4 +1,4 @@
-# mini_grocery_app
+# mini_grocery
 
 A new Flutter project.
 

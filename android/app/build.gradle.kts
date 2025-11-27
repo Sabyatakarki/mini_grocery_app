@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.sabyata.batch35c.mini_grocery_app"
+    namespace = "com.sabyata.u35c.mini_grocery"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -21,7 +21,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.sabyata.batch35c.mini_grocery_app"
+        applicationId = "com.sabyata.u35c.mini_grocery"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
