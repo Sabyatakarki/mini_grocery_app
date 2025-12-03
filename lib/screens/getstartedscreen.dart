@@ -63,7 +63,7 @@ class GetStartedScreen extends StatelessWidget {
                   // Big Groceries Image
                   Image.asset(
                     'assets/images/getstartedpage.jpg', // your grocery image path
-                    height: 240,
+                    height: 300,
                     fit: BoxFit.cover,
                   ),
 
@@ -90,7 +90,7 @@ class GetStartedScreen extends StatelessWidget {
                         // Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()));
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.lightGreenAccent[700],
+                        backgroundColor: const Color.fromARGB(255, 133, 208, 86),
                         padding: EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -100,7 +100,7 @@ class GetStartedScreen extends StatelessWidget {
                         "Get started",
                         style: TextStyle(
                           fontSize: 18,
-                          color: Colors.black,
+                          color: Colors.white,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
