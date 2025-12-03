@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mini_grocery/screens/loginpagescreen.dart';
+
 
 class GetStartedScreen extends StatelessWidget {
   const GetStartedScreen({super.key});
@@ -26,7 +28,7 @@ class GetStartedScreen extends StatelessWidget {
 
                   // Welcome Text
                   Text(
-                    "Welcome!",
+                    "Welcome",
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
@@ -38,7 +40,7 @@ class GetStartedScreen extends StatelessWidget {
                   SizedBox(height: 5),
 
                   Text(
-                    "Your fresh picks\nstart here.",
+                    "Your fresh picks start here.",
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w600,
@@ -87,7 +89,7 @@ class GetStartedScreen extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () {
                         // next page navigation
-                        // Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()));
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()));
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color.fromARGB(255, 133, 208, 86),
