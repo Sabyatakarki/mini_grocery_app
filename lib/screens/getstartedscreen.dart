@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mini_grocery/screens/loginpagescreen.dart';
+import 'package:mini_grocery/screens/onboardingscreen.dart';
 
 
 class GetStartedScreen extends StatelessWidget {
@@ -89,7 +89,7 @@ class GetStartedScreen extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () {
                         // next page navigation
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()));
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => Onboardingscreen()));
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color.fromARGB(255, 133, 208, 86),
