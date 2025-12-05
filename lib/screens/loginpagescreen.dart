@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:mini_grocery/screens/getstartedscreen.dart';
+import 'package:mini_grocery/screens/dashboard_screen.dart';
 import 'package:mini_grocery/screens/createaccountscreen.dart';
+import 'package:mini_grocery/screens/onboardingscreen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -37,7 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const GetStartedScreen(),
+                          builder: (context) => const Onboardingscreen(),
                         ),
                       );
                     },

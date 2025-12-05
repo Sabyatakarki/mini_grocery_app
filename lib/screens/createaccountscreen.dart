@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mini_grocery/screens/getstartedscreen.dart';
 import 'package:mini_grocery/screens/loginpagescreen.dart';
 
 class Createaccountscreen extends StatefulWidget {
@@ -37,7 +36,7 @@ class _CreateaccountscreenState extends State<Createaccountscreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const GetStartedScreen(),
+                      builder: (context) => const LoginScreen(),
                     ),
                   );
                 },
@@ -93,7 +92,7 @@ class _CreateaccountscreenState extends State<Createaccountscreen> {
                   ),
                 ),
 
-                SizedBox(height: screenHeight * 0.02),
+                SizedBox(height: screenHeight * 0.02),   
 
                 // EMAIL
                 Align(
