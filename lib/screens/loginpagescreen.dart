@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mini_grocery/screens/dashboard_screen.dart';
 import 'package:mini_grocery/screens/createaccountscreen.dart';
+import 'package:mini_grocery/screens/dashboard_screen.dart';
 import 'package:mini_grocery/screens/onboardingscreen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -11,7 +11,12 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
+
   bool _passwordVisible = false;
+
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -22,72 +27,70 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: Colors.white,
 
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: SizedBox(
-            height: screenHeight,
-            child: Column(
-              children: [
+        child: SizedBox(
+          height: screenHeight,
+          child: Column(
+            children: [
 
-                // BACK BUTTON
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                    color: Colors.black,
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const Onboardingscreen(),
-                        ),
-                      );
-                    },
+              // BACK BUTTON
+              Align(
+                alignment: Alignment.centerLeft,
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                  color: Colors.black,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const Onboardingscreen(),
+                      ),
+                    );
+                  },
+                ),
+              ),
+
+              SizedBox(height: screenHeight * 0.03),
+
+              // TITLE
+              Column(
+                children: const [
+                  Text(
+                    "Welcome Back",
+                    style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF6BAA44),
+                    ),
                   ),
-                ),
-
-                SizedBox(height: screenHeight * 0.03),
-
-                // TITLE SECTION (CENTERED + LOWERED)
-                Column(
-                  children: [
-                    Text(
-                      "Welcome Back",
-                      style: const TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF6BAA44),
-                      ),
-                      textAlign: TextAlign.center,
+                  SizedBox(height: 10),
+                  Text(
+                    "Get back to your shopping right away",
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black54,
                     ),
-                    const SizedBox(height: 10),
-                    Text(
-                      "Get back to your shopping right away",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black54,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
+                  ),
+                ],
+              ),
 
-                SizedBox(height: screenHeight * 0.04),
+              SizedBox(height: screenHeight * 0.04),
 
-                // FORM SECTION
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: screenWidth > 600 ? 120 : 25),
+              // FORM STARTS HERE
+              Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: screenWidth > 600 ? 120 : 25),
+                child: Form(
+                  key: _formKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // EMAIL
-                      const Text(
-                        "Enter your email:",
-                        style: TextStyle(fontSize: 14),
-                      ),
+
+                      const Text("Enter your email:"),
                       const SizedBox(height: 8),
 
-                      TextField(
+                      // EMAIL TEXTFORMFIELD
+                      TextFormField(
+                        controller: _emailController,
                         decoration: InputDecoration(
                           prefixIcon: const Icon(Icons.email_outlined),
                           filled: true,
@@ -96,18 +99,22 @@ class _LoginScreenState extends State<LoginScreen> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return "Please enter your email";
+                          }
+                          return null;
+                        },
                       ),
 
                       const SizedBox(height: 20),
 
-                      // PASSWORD
-                      const Text(
-                        "Enter your password:",
-                        style: TextStyle(fontSize: 14),
-                      ),
+                      const Text("Enter your password:"),
                       const SizedBox(height: 8),
 
-                      TextField(
+                      // PASSWORD TEXTFORMFIELD
+                      TextFormField(
+                        controller: _passwordController,
                         obscureText: !_passwordVisible,
                         decoration: InputDecoration(
                           prefixIcon: const Icon(Icons.lock_outline),
@@ -129,6 +136,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return "Please enter your password";
+                          }
+                          return null;
+                        },
                       ),
 
                       const SizedBox(height: 10),
@@ -145,7 +158,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       // LOGIN BUTTON
                       Center(
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            if (_formKey.currentState!.validate()) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const DashboardScreen(),
+                                ),
+                              );
+                            }
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF6BAA44),
                             minimumSize: const Size(180, 45),
@@ -160,7 +182,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       const SizedBox(height: 15),
 
-                      // NAVIGATE TO SIGNUP
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -188,21 +209,21 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
                 ),
+              ),
 
-                const Spacer(),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Image.asset(
-                      'assets/images/loginpage.png',
-                      width: 400,
-                      height: 299,
-                      ),
-                    ],
-                    ),
-    
-              ],
-            ),
+              const Spacer(),
+
+              Row(
+                children: [
+                  Image.asset(
+                    'assets/images/loginpage.png',
+                    width: screenWidth > 600 ? 600 : 400,
+                    height: screenWidth > 600 ? 380 : 299,
+                    fit: BoxFit.cover,
+                  ),
+                ],
+              )
+            ],
           ),
         ),
       ),
