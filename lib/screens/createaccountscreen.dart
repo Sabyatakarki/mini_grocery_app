@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mini_grocery/screens/dashboard_screen.dart';
 import 'package:mini_grocery/screens/loginpagescreen.dart';
 
 class Createaccountscreen extends StatefulWidget {
@@ -242,13 +243,17 @@ class _CreateaccountscreenState extends State<Createaccountscreen> {
                     SizedBox(height: screenHeight * 0.015),
 
                     // SIGN UP BUTTON
-                    ElevatedButton(
+                   ElevatedButton(
                       onPressed: () {
-                        if (_formKey.currentState!.validate() &&
-                            _acceptTerms) {
-                          // All good
+                        if (_formKey.currentState!.validate() && _acceptTerms) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => DashboardScreen(),
+                            ),
+                          );
                         } else {
-                          setState(() {}); // refresh error text for checkbox
+                          setState(() {});
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -261,7 +266,6 @@ class _CreateaccountscreenState extends State<Createaccountscreen> {
                         style: TextStyle(color: Colors.white),
                       ),
                     ),
-
                     SizedBox(height: screenHeight * 0.015),
 
                     Row(
@@ -292,13 +296,7 @@ class _CreateaccountscreenState extends State<Createaccountscreen> {
               ),
             ),
 
-            // BOTTOM IMAGE
-            Image.asset(
-              'assets/images/signup.jpg',
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: screenHeight * 0.30,
-            ),
+          
           ],
         ),
       ),

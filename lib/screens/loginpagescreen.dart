@@ -211,18 +211,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
 
-              const Spacer(),
+            
+             
 
-              Row(
-                children: [
-                  Image.asset(
-                    'assets/images/loginpage.png',
-                    width: screenWidth > 600 ? 600 : 400,
-                    height: screenWidth > 600 ? 380 : 299,
-                    fit: BoxFit.cover,
-                  ),
-                ],
-              )
             ],
           ),
         ),
