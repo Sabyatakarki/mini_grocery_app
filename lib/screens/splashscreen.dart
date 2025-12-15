@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:mini_grocery/screens/onboardingscreen.dart';
+import 'package:mini_grocery/screens/getstartedscreen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -14,12 +14,12 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
 
-    // Delay 2 seconds then go to onboarding screen
-    Timer(const Duration(seconds: 2), () {
+    // Delay 3 seconds then navigate
+    Timer(const Duration(seconds: 3), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => const Onboardingscreen(),
+          builder: (context) => const GetStartedScreen(),
         ),
       );
     });
@@ -28,12 +28,33 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // match your app theme
+      backgroundColor: Colors.white,
+
       body: Center(
-        child: Image.asset(
-          'assets/images/sales.png',
-          width: 150,
-          height: 150,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+
+            // APP ICON
+            Image.asset(
+              'assets/images/sales.png',
+              width: 150,
+              height: 150,
+            ),
+
+            const SizedBox(height: 20),
+
+            // ONLY ONE TEXT
+            const Text(
+              "Fresh Picks",
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF6BAA44),
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       ),
     );

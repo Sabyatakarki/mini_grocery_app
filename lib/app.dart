@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mini_grocery/screens/getstartedscreen.dart';
-import 'package:mini_grocery/screens/splashscreen.dart';
+import 'package:mini_grocery/screens/dashboard_screen.dart';
 
 class App extends StatelessWidget {
 const App({super.key});
@@ -8,7 +7,7 @@ const App({super.key});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home:SplashScreen(),
+      home:DashboardScreen(),
     );
   }
 }
