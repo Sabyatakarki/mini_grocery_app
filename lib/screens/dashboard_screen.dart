@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mini_grocery/screens/buttom_screen/cart_screen.dart';
+import 'package:mini_grocery/screens/buttom_screen/categories.dart';
 import 'package:mini_grocery/screens/buttom_screen/home_screen.dart';
 import 'package:mini_grocery/screens/buttom_screen/profile_screen.dart';
 
@@ -15,6 +16,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final List<Widget> screens = const [
     HomeScreen(),
     CartScreen(),
+    Categories(),
     ProfileScreen(),
   ];
 
