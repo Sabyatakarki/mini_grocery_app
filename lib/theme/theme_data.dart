@@ -3,7 +3,11 @@ import 'package:flutter/material.dart';
 ThemeData getApplicationTheme() {
   return ThemeData(
     colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightGreen),
+<<<<<<< HEAD
     useMaterial3: true,
+=======
+    useMaterial3: false,
+>>>>>>> sprint-2
     fontFamily: 'OpenSansItalic',  
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
@@ -19,4 +23,8 @@ ThemeData getApplicationTheme() {
       ),
     ),
   );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> sprint-2

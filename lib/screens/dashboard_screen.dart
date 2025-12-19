@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mini_grocery/screens/buttom_screen/cart_screen.dart';
-import 'package:mini_grocery/screens/buttom_screen/categories_screen.dart';
+import 'package:mini_grocery/screens/buttom_screen/categories.dart';
 import 'package:mini_grocery/screens/buttom_screen/home_screen.dart';
 import 'package:mini_grocery/screens/buttom_screen/profile_screen.dart';
 
@@ -15,7 +15,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   final List<Widget> screens = const [
     HomeScreen(),
-    CategoriesScreen(),
+    Categories(),
     CartScreen(),
     ProfileScreen(),
   ];
@@ -32,8 +32,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.blueGrey,
-        unselectedItemColor: Colors.grey,
 
         onTap: (index) {
           setState(() {
