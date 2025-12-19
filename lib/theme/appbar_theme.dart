@@ -15,11 +15,4 @@ AppBarTheme getAppBarTheme(){
       color: Colors.white,
     ),
   );
-<<<<<<< HEAD
 }
-
-
-
-=======
-}
->>>>>>> sprint-2
