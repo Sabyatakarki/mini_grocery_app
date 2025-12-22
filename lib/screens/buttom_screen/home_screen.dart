@@ -11,7 +11,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return const Center(
-      child: Text('This is Home screen'),
+      child: Text('This is the home screen'),
     );
   }
 }

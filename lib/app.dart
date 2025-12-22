@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:mini_grocery/screens/dashboard_screen.dart';
+import 'package:mini_grocery/screens/splashscreen.dart';
 import 'package:mini_grocery/theme/appbar_theme.dart';
 import 'package:mini_grocery/theme/buttom_navigationbar_theme_data.dart';
 import 'package:mini_grocery/theme/inputdecoration_theme.dart';
@@ -19,7 +19,7 @@ class App extends StatelessWidget {
         inputDecorationTheme: getinputdecorationtheme(),
         bottomNavigationBarTheme: getBottomNavigationBarTheme(),
       ),
-      home: const DashboardScreen(),
+      home: const SplashScreen(),
     );
   }
 }
