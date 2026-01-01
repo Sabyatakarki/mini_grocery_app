@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mini_grocery/screens/onboardingscreen.dart';
+import 'package:mini_grocery/features/onboarding/presentation/pages/onboardingscreen.dart';
 
 
 class GetStartedScreen extends StatelessWidget {
