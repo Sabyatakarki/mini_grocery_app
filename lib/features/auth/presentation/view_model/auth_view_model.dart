@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lost_n_found/features/auth/domain/usecases/login_usecase.dart';
-import 'package:lost_n_found/features/auth/domain/usecases/register_usecase.dart';
-import 'package:lost_n_found/features/auth/presentation/state/auth_state.dart';
+import 'package:mini_grocery/features/auth/domain/usecases/register_usecase.dart';
+import 'package:mini_grocery/features/auth/domain/usecases/login_usecase.dart';
+import 'package:mini_grocery/features/auth/presentation/state/auth_state.dart';
+import 'package:uuid/uuid.dart';
+
 
 
 final authViewModelProvider = NotifierProvider<AuthViewModel,AuthState>(
@@ -9,13 +11,13 @@ final authViewModelProvider = NotifierProvider<AuthViewModel,AuthState>(
 
 class AuthViewModel extends Notifier<AuthState>{
     late final RegisterUsecase _registerUsecase;
-    late final LoginUsecase _loginUsecase;
+    late final LoginUseCase _loginUsecase;
 
     
   @override
   AuthState build() {
     _registerUsecase = ref.read(registerUsercaseProvider);
-    _loginUsecase = ref.read(loginUsecaseProvider);
+    _loginUsecase = ref.read(loginUseCaseProvider);
     return AuthState();
   }
   Future<void> register({
@@ -29,7 +31,9 @@ class AuthViewModel extends Notifier<AuthState>{
         state = state.copyWith(status: AuthStatus.loading);
         //wait for 2 seconds
         await Future.delayed(Duration(seconds:2));
+        final uuid = Uuid();
         final params = RegisterUsecaseParams(
+        authId: uuid.v4(),
         fullName: fullName,
         email: email,
         username: username,
@@ -58,7 +62,7 @@ class AuthViewModel extends Notifier<AuthState>{
   }) async {
     state = state.copyWith(status: AuthStatus.loading);
   
-  final params = LoginUsecaseParams(
+  final params = LoginParams(
     email: email,
     password: password,
   );

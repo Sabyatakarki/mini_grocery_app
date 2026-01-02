@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:mini_grocery/screens/createaccountscreen.dart';
+import 'package:mini_grocery/core/utils/snackbar_utils.dart';
+import 'package:mini_grocery/features/auth/presentation/pages/createaccountscreen.dart';
 import 'package:mini_grocery/screens/dashboard_screen.dart';
-import 'package:mini_grocery/screens/onboardingscreen.dart';
+import 'package:mini_grocery/features/onboarding/presentation/pages/onboardingscreen.dart';
+
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -25,13 +27,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-
       body: SafeArea(
         child: SizedBox(
           height: screenHeight,
           child: Column(
             children: [
-
               // BACK BUTTON
               Align(
                 alignment: Alignment.centerLeft,
@@ -84,7 +84,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-
                       const Text("Enter your email:"),
                       const SizedBox(height: 8),
 
@@ -159,14 +158,33 @@ class _LoginScreenState extends State<LoginScreen> {
                       Center(
                         child: ElevatedButton(
                           onPressed: () {
-                            if (_formKey.currentState!.validate()) {
+                            // Check empty fields first
+                            if (_emailController.text.trim().isEmpty) {
+                              SnackbarUtils.showError(
+                                  context, "Please enter your email");
+                              return;
+                            }
+
+                            if (_passwordController.text.trim().isEmpty) {
+                              SnackbarUtils.showError(
+                                  context, "Please enter your password");
+                              return;
+                            }
+
+                            // All fields filled -> show success SnackBar
+                            SnackbarUtils.showSuccess(
+                                context, "Login Successful");
+
+                            // Wait 3 seconds before navigating
+                            Future.delayed(const Duration(seconds: 2), () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const DashboardScreen(),
+                                  builder: (context) =>
+                                      const DashboardScreen(),
                                 ),
                               );
-                            }
+                            });
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF6BAA44),
@@ -210,8 +228,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
-
-        
             ],
           ),
         ),

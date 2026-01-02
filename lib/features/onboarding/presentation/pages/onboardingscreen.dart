@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mini_grocery/screens/loginpagescreen.dart';
+import 'package:mini_grocery/features/auth/presentation/pages/loginpagescreen.dart';
+
 
 class Onboardingscreen extends StatefulWidget {
   const Onboardingscreen({super.key});
