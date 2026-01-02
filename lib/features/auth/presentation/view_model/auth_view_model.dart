@@ -24,8 +24,7 @@ class AuthViewModel extends Notifier<AuthState>{
     required String fullName,
     required String email,
     required String username,
-    String? batchId,
-    String? phoneNumber,
+  
     required String password,
     }) async {
         state = state.copyWith(status: AuthStatus.loading);
@@ -37,8 +36,7 @@ class AuthViewModel extends Notifier<AuthState>{
         fullName: fullName,
         email: email,
         username: username,
-        batchId: batchId,
-        phoneNumber: phoneNumber,
+    
         password: password,
     );
 
