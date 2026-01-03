@@ -4,7 +4,6 @@ import 'package:mini_grocery/features/auth/presentation/pages/createaccountscree
 import 'package:mini_grocery/screens/dashboard_screen.dart';
 import 'package:mini_grocery/features/onboarding/presentation/pages/onboardingscreen.dart';
 
-
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -37,7 +36,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 alignment: Alignment.centerLeft,
                 child: IconButton(
                   icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                  color: Colors.black,
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -52,14 +50,14 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(height: screenHeight * 0.03),
 
               // TITLE
-              Column(
-                children: const [
+              const Column(
+                children: [
                   Text(
                     "Welcome Back",
                     style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF6BAA44),
+                      fontSize: 33,
+                      fontFamily: 'OpenSansBold',
+                      color: Color.fromARGB(255, 72, 138, 31),
                     ),
                   ),
                   SizedBox(height: 10),
@@ -67,7 +65,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     "Get back to your shopping right away",
                     style: TextStyle(
                       fontSize: 16,
-                      color: Colors.black54,
+                      color: Colors.black,
                     ),
                   ),
                 ],
@@ -75,10 +73,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
               SizedBox(height: screenHeight * 0.04),
 
-              // FORM STARTS HERE
+              // FORM
               Padding(
                 padding: EdgeInsets.symmetric(
-                    horizontal: screenWidth > 600 ? 120 : 25),
+                  horizontal: screenWidth > 600 ? 120 : 25,
+                ),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -87,7 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       const Text("Enter your email:"),
                       const SizedBox(height: 8),
 
-                      // EMAIL TEXTFORMFIELD
+                      // EMAIL FIELD
                       TextFormField(
                         controller: _emailController,
                         decoration: InputDecoration(
@@ -99,8 +98,12 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return "Please enter your email";
+                          if (value == null || value.trim().isEmpty) {
+                            return "Email is required";
+                          }
+                          if (!RegExp(r'@')
+                              .hasMatch(value.trim())) {
+                            return "Enter a valid email";
                           }
                           return null;
                         },
@@ -111,7 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       const Text("Enter your password:"),
                       const SizedBox(height: 8),
 
-                      // PASSWORD TEXTFORMFIELD
+                      // PASSWORD FIELD
                       TextFormField(
                         controller: _passwordController,
                         obscureText: !_passwordVisible,
@@ -136,8 +139,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return "Please enter your password";
+                          if (value == null || value.trim().isEmpty) {
+                            return "Password is required";
+                          }
+                          if (value.trim().length < 6) {
+                            return "Password must be at least 6 characters";
                           }
                           return null;
                         },
@@ -148,7 +154,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Center(
                         child: Text(
                           "Forgot Password?",
-                          style: TextStyle(color: Colors.grey[600]),
+                          style: TextStyle(color: Colors.black54),
                         ),
                       ),
 
@@ -158,26 +164,29 @@ class _LoginScreenState extends State<LoginScreen> {
                       Center(
                         child: ElevatedButton(
                           onPressed: () {
-                            // Check empty fields first
-                            if (_emailController.text.trim().isEmpty) {
-                              SnackbarUtils.showError(
-                                  context, "Please enter your email");
+                            // 1️⃣ Inline validation
+                            if (!_formKey.currentState!.validate()) {
                               return;
                             }
 
-                            if (_passwordController.text.trim().isEmpty) {
+                            // 2️⃣ Fake auth check (replace later with Firebase/API)
+                            final email = _emailController.text.trim();
+                            final password =
+                                _passwordController.text.trim();
+
+                            if (email != "sabyata@gmail.com" ||
+                                password != "123456") {
                               SnackbarUtils.showError(
-                                  context, "Please enter your password");
+                                  context, "Incorrect email or password");
                               return;
                             }
 
-                            // All fields filled -> show success SnackBar
+                            // 3️⃣ Success
                             SnackbarUtils.showSuccess(
-                                context, "Login Successful");
+                                context, "Login successful");
 
-                            // Wait 3 seconds before navigating
                             Future.delayed(const Duration(seconds: 2), () {
-                              Navigator.push(
+                              Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) =>

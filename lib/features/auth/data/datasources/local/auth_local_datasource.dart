@@ -79,10 +79,10 @@ class AuthLocalDataSource implements IAuthDataSource {
     try {
       final user = _hiveService.login(email, password);
 
-      if (user != null && user.authId != null) {
+      if (user != null) {
         // Save user session to SharedPreferences for persistent login
         await _userSessionService.saveUserSession(
-          userId: user.authId!,
+          userId: user.authId,
           email: user.email,
           fullName: user.fullName ?? '',
           username: user.username ?? '',

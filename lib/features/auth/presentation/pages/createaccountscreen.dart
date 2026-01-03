@@ -55,9 +55,9 @@ class _CreateaccountscreenState extends State<Createaccountscreen> {
                 const Text(
                   "Create Account",
                   style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF6BAA44),
+                    fontSize: 30,
+                    fontFamily: 'OpenSansBold',
+                    color: Color.fromARGB(255, 72, 138, 31),
                   ),
                 ),
                 const SizedBox(height: 8),

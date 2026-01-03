@@ -6,7 +6,6 @@ import 'package:mini_grocery/core/services/hive/hive_service.dart';
 import 'package:mini_grocery/core/services/storage/user_session_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -32,7 +31,7 @@ void main() async {
         sharedPreferencesProvider.overrideWithValue(sharedPreferences),
       ],
       child: 
-      const App(),
+      const App(),//updated
     ),
   );
 }

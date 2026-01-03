@@ -5,7 +5,7 @@ ThemeData getApplicationTheme() {
     colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightGreen),
     
     useMaterial3: false,
-    fontFamily: 'OpenSansItalic',  
+    fontFamily: 'OpenSansRegular',  
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         textStyle: const TextStyle(
