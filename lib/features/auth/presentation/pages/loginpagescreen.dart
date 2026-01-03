@@ -1,23 +1,57 @@
 import 'package:flutter/material.dart';
-import 'package:mini_grocery/core/utils/snackbar_utils.dart';
-import 'package:mini_grocery/features/auth/presentation/pages/createaccountscreen.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mini_grocery/core/services/hive/hive_service.dart';
 import 'package:mini_grocery/screens/dashboard_screen.dart';
-import 'package:mini_grocery/features/onboarding/presentation/pages/onboardingscreen.dart';
+import 'package:mini_grocery/features/auth/presentation/pages/createaccountscreen.dart';
+import 'package:mini_grocery/core/utils/snackbar_utils.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-
-  bool _passwordVisible = false;
-
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _passwordVisible = false;
+  bool _isLoading = false;
+
+  Future<void> _login() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    final hiveService = ref.read(hiveServiceProvider);
+
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    final user = hiveService.login(email, password);
+
+    if (user != null) {
+      // save session
+      await hiveService.setLoginSession(user.authId);
+
+      if (!mounted) return;
+      SnackbarUtils.showSuccess(context, "Login successful");
+
+      // go to dashboard
+      Future.delayed(const Duration(seconds: 1), () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const DashboardScreen()),
+        );
+      });
+    } else {
+      if (!mounted) return;
+      SnackbarUtils.showError(context, "Invalid email or password");
+    }
+
+    setState(() => _isLoading = false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,19 +71,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: IconButton(
                   icon: const Icon(Icons.arrow_back_ios_new_rounded),
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const Onboardingscreen(),
-                      ),
-                    );
+                    Navigator.pop(context);
                   },
                 ),
               ),
 
               SizedBox(height: screenHeight * 0.03),
 
-              // TITLE
               const Column(
                 children: [
                   Text(
@@ -63,10 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(height: 10),
                   Text(
                     "Get back to your shopping right away",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black,
-                    ),
+                    style: TextStyle(fontSize: 16, color: Colors.black),
                   ),
                 ],
               ),
@@ -85,8 +110,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       const Text("Enter your email:"),
                       const SizedBox(height: 8),
-
-                      // EMAIL FIELD
                       TextFormField(
                         controller: _emailController,
                         decoration: InputDecoration(
@@ -101,31 +124,25 @@ class _LoginScreenState extends State<LoginScreen> {
                           if (value == null || value.trim().isEmpty) {
                             return "Email is required";
                           }
-                          if (!RegExp(r'@')
-                              .hasMatch(value.trim())) {
+                          if (!RegExp(r'@').hasMatch(value.trim())) {
                             return "Enter a valid email";
                           }
                           return null;
                         },
                       ),
-
                       const SizedBox(height: 20),
 
                       const Text("Enter your password:"),
                       const SizedBox(height: 8),
-
-                      // PASSWORD FIELD
                       TextFormField(
                         controller: _passwordController,
                         obscureText: !_passwordVisible,
                         decoration: InputDecoration(
                           prefixIcon: const Icon(Icons.lock_outline),
                           suffixIcon: IconButton(
-                            icon: Icon(
-                              _passwordVisible
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
-                            ),
+                            icon: Icon(_passwordVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off),
                             onPressed: () {
                               setState(() {
                                 _passwordVisible = !_passwordVisible;
@@ -148,7 +165,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           return null;
                         },
                       ),
-
                       const SizedBox(height: 10),
 
                       Center(
@@ -163,47 +179,20 @@ class _LoginScreenState extends State<LoginScreen> {
                       // LOGIN BUTTON
                       Center(
                         child: ElevatedButton(
-                          onPressed: () {
-                            // 1️⃣ Inline validation
-                            if (!_formKey.currentState!.validate()) {
-                              return;
-                            }
-
-                            // 2️⃣ Fake auth check (replace later with Firebase/API)
-                            final email = _emailController.text.trim();
-                            final password =
-                                _passwordController.text.trim();
-
-                            if (email != "sabyata@gmail.com" ||
-                                password != "123456") {
-                              SnackbarUtils.showError(
-                                  context, "Incorrect email or password");
-                              return;
-                            }
-
-                            // 3️⃣ Success
-                            SnackbarUtils.showSuccess(
-                                context, "Login successful");
-
-                            Future.delayed(const Duration(seconds: 2), () {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const DashboardScreen(),
-                                ),
-                              );
-                            });
-                          },
+                          onPressed: _isLoading ? null : _login,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF6BAA44),
                             minimumSize: const Size(180, 45),
                             shape: const StadiumBorder(),
                           ),
-                          child: const Text(
-                            "Log in",
-                            style: TextStyle(color: Colors.white),
-                          ),
+                          child: _isLoading
+                              ? const CircularProgressIndicator(
+                                  color: Colors.white,
+                                )
+                              : const Text(
+                                  "Log in",
+                                  style: TextStyle(color: Colors.white),
+                                ),
                         ),
                       ),
 

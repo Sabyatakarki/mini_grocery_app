@@ -9,7 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 4. Set System UI Styles
+  // Set system UI styles
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -18,20 +18,23 @@ void main() async {
       systemNavigationBarIconBrightness: Brightness.dark,
     ),
   );
-  // Initialize Hive Service
+
+  // Initialize Hive
   final hiveService = HiveService();
   await hiveService.init();
-  // 5. Initialize SharedPreferences instance
+
+  // SharedPreferences instance
   final sharedPreferences = await SharedPreferences.getInstance();
+
+  // Check if user is logged in
+  final isLoggedIn = sharedPreferences.getBool('is_logged_in') ?? false;
 
   runApp(
     ProviderScope(
       overrides: [
-        // Inject initialized SharedPreferences into the provider
         sharedPreferencesProvider.overrideWithValue(sharedPreferences),
       ],
-      child: 
-      const App(),//updated
+      child: App(isLoggedIn: isLoggedIn),
     ),
   );
 }

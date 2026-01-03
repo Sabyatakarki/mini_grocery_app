@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:mini_grocery/core/utils/snackbar_utils.dart';
 import 'package:mini_grocery/features/auth/presentation/pages/loginpagescreen.dart';
-
+import 'package:mini_grocery/features/auth/data/models/auth_hive_model.dart';
+import 'package:mini_grocery/core/services/hive/hive_service.dart';
 
 class Createaccountscreen extends StatefulWidget {
   const Createaccountscreen({super.key});
@@ -21,6 +22,14 @@ class _CreateaccountscreenState extends State<Createaccountscreen> {
   bool _passwordVisible = false;
   bool _confirmPasswordVisible = false;
   bool _acceptTerms = false;
+
+  final HiveService _hiveService = HiveService();
+
+  @override
+  void initState() {
+    super.initState();
+    _hiveService.init(); // Initialize Hive once
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,12 +51,7 @@ class _CreateaccountscreenState extends State<Createaccountscreen> {
                   child: IconButton(
                     icon: const Icon(Icons.arrow_back_ios_new_rounded),
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const LoginScreen(),
-                        ),
-                      );
+                      Navigator.pop(context);
                     },
                   ),
                 ),
@@ -113,7 +117,6 @@ class _CreateaccountscreenState extends State<Createaccountscreen> {
                     if (value == null || value.trim().isEmpty) {
                       return "Email is required";
                     }
-                    // optional: basic email format check
                     if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value.trim())) {
                       return "Enter a valid email";
                     }
@@ -220,15 +223,24 @@ class _CreateaccountscreenState extends State<Createaccountscreen> {
 
                 // SIGN UP BUTTON
                 ElevatedButton(
-                  onPressed: () {
-                    // Check inline validation first
+                  onPressed: () async {
                     if (_formKey.currentState!.validate()) {
                       if (!_acceptTerms) {
                         SnackbarUtils.showWarning(context, "Please accept Terms & Privacy Policy");
                         return;
                       }
 
-                      // Success
+                      // ✅ Create new user
+                      final newUser = AuthHiveModel(
+                        fullName: fullNameController.text.trim(),
+                        email: emailController.text.trim(),
+                        password: passController.text.trim(),
+                      );
+
+                      // ✅ Save to Hive
+                      await _hiveService.register(newUser);
+
+                      // Show success
                       SnackbarUtils.showSuccess(context, "Account Created Successfully");
 
                       Future.delayed(const Duration(seconds: 2), () {
@@ -251,32 +263,6 @@ class _CreateaccountscreenState extends State<Createaccountscreen> {
                     style: TextStyle(color: Colors.white),
                   ),
                 ),
-
-                const SizedBox(height: 15),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("Already have an account? "),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const LoginScreen(),
-                          ),
-                        );
-                      },
-                      child: const Text(
-                        "Log in.",
-                        style: TextStyle(
-                          color: Color(0xFF6BAA44),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 30),
               ],
             ),
           ),

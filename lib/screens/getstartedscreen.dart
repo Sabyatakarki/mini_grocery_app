@@ -1,12 +1,54 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mini_grocery/features/onboarding/presentation/pages/onboardingscreen.dart';
+import 'package:mini_grocery/core/services/hive/hive_service.dart';
+import 'package:mini_grocery/screens/dashboard_screen.dart';
 
-
-class GetStartedScreen extends StatelessWidget {
+class GetStartedScreen extends ConsumerStatefulWidget {
   const GetStartedScreen({super.key});
 
   @override
+  ConsumerState<GetStartedScreen> createState() => _GetStartedScreenState();
+}
+
+class _GetStartedScreenState extends ConsumerState<GetStartedScreen> {
+  bool _checkingSession = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus();
+  }
+
+  Future<void> _checkLoginStatus() async {
+    final hiveService = ref.read(hiveServiceProvider);
+    final loggedIn = await hiveService.isLoggedIn();
+    if (loggedIn) {
+      final userId = await hiveService.getLoggedInUserId();
+      if (userId != null) {
+        // Navigate directly to Dashboard
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const DashboardScreen()),
+        );
+        return;
+      }
+    }
+
+    // If not logged in, show GetStarted normally
+    setState(() {
+      _checkingSession = false;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_checkingSession) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -17,17 +59,10 @@ class GetStartedScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // App Logo
-                  SizedBox(height: 10),
-                  Image.asset(
-                    'assets/images/sales.png', // your logo path
-                    height: 90,
-                  ),
-
-                  SizedBox(height: 20),
-
-                  // Welcome Text
-                  Text(
+                  const SizedBox(height: 10),
+                  Image.asset('assets/images/sales.png', height: 90),
+                  const SizedBox(height: 20),
+                  const Text(
                     "Welcome",
                     style: TextStyle(
                       fontSize: 28,
@@ -36,9 +71,7 @@ class GetStartedScreen extends StatelessWidget {
                     ),
                     textAlign: TextAlign.center,
                   ),
-
-                  SizedBox(height: 5),
-
+                  const SizedBox(height: 5),
                   Text(
                     "Your fresh picks start here.",
                     style: TextStyle(
@@ -48,57 +81,44 @@ class GetStartedScreen extends StatelessWidget {
                     ),
                     textAlign: TextAlign.center,
                   ),
-
-                  SizedBox(height: 15),
-
-                  Text(
+                  const SizedBox(height: 15),
+                  const Text(
                     "All your groceries, one tap away.",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black54,
-                    ),
+                    style: TextStyle(fontSize: 16, color: Colors.black54),
                     textAlign: TextAlign.center,
                   ),
-
-                  SizedBox(height: 30),
-
-                  // Big Groceries Image
+                  const SizedBox(height: 30),
                   Image.asset(
-                    'assets/images/getstartedpage.jpg', // your grocery image path
+                    'assets/images/getstartedpage.jpg',
                     height: 300,
                     fit: BoxFit.cover,
                   ),
-
-                  SizedBox(height: 30),
-
-                  // Tagline
-                  Text(
+                  const SizedBox(height: 30),
+                  const Text(
                     "Fresh food, fresh mind, fresh life",
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: Colors.black87,
-                    ),
+                    style: TextStyle(fontSize: 15, color: Colors.black87),
                     textAlign: TextAlign.center,
                   ),
-
-                  SizedBox(height: 25),
-
-                  // Get Started Button
+                  const SizedBox(height: 25),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        // next page navigation
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => Onboardingscreen()));
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => Onboardingscreen()),
+                        );
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 133, 208, 86),
-                        padding: EdgeInsets.symmetric(vertical: 14),
+                        backgroundColor:
+                            const Color.fromARGB(255, 133, 208, 86),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: Text(
+                      child: const Text(
                         "Get started",
                         style: TextStyle(
                           fontSize: 18,
@@ -108,8 +128,7 @@ class GetStartedScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
