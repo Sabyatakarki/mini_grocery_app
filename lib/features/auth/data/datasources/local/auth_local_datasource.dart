@@ -3,6 +3,7 @@ import 'package:mini_grocery/core/services/hive/hive_service.dart';
 import 'package:mini_grocery/core/services/storage/user_session_service.dart';
 import 'package:mini_grocery/features/auth/data/models/auth_hive_model.dart';
 
+//Provider
 final authLocalDataSourceProvider = Provider<AuthLocalDataSource>((ref) {
   final hiveService = ref.read(hiveServiceProvider);
   final userSessionService = ref.read(userSessionServiceProvider);
@@ -11,6 +12,7 @@ final authLocalDataSourceProvider = Provider<AuthLocalDataSource>((ref) {
     userSessionService: userSessionService,
   );
 });
+
 
 class AuthLocalDataSource {
   final HiveService _hiveService;
@@ -24,9 +26,14 @@ class AuthLocalDataSource {
 
   /// Login user
   Future<AuthHiveModel?> login(String email, String password) async {
-    final user = _hiveService.login(email, password ?? '');
+    final user = await _hiveService.login(email, password);
     if (user != null) {
-      await _userSessionService.saveUserSession(userId: user.authId, email: '', fullName: '', username: '');
+      await _userSessionService.saveUserSession(
+        userId: user.authId,
+        email: user.email,
+        fullName: user.fullName,
+        username: user.username,
+      );
     }
     return user;
   }
@@ -79,6 +86,6 @@ class AuthLocalDataSource {
 
   /// Get user by ID
   Future<AuthHiveModel?> getUserById(String authId) async {
-    return _hiveService.getUserById(authId);
+    return await _hiveService.getUserById(authId);
   }
 }

@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mini_grocery/core/utils/snackbar_utils.dart';
-import 'package:mini_grocery/features/auth/presentation/pages/loginpagescreen.dart';
 import 'package:mini_grocery/features/auth/data/models/auth_hive_model.dart';
+import 'package:mini_grocery/features/auth/presentation/pages/loginpagescreen.dart';
 import 'package:mini_grocery/core/services/hive/hive_service.dart';
 
-class Createaccountscreen extends StatefulWidget {
+class Createaccountscreen extends ConsumerStatefulWidget {
   const Createaccountscreen({super.key});
 
   @override
-  State<Createaccountscreen> createState() => _CreateaccountscreenState();
+  ConsumerState<Createaccountscreen> createState() => _CreateaccountscreenState();
 }
 
-class _CreateaccountscreenState extends State<Createaccountscreen> {
+class _CreateaccountscreenState extends ConsumerState<Createaccountscreen> {
   final _formKey = GlobalKey<FormState>();
 
   final fullNameController = TextEditingController();
@@ -230,15 +231,19 @@ class _CreateaccountscreenState extends State<Createaccountscreen> {
                         return;
                       }
 
+                      final hiveService = ref.read(hiveServiceProvider);
+                      final email = emailController.text.trim();
+
                       // ✅ Create new user
                       final newUser = AuthHiveModel(
                         fullName: fullNameController.text.trim(),
-                        email: emailController.text.trim(),
+                        email: email,
+                        username: email, // Use email as username
                         password: passController.text.trim(),
                       );
 
                       // ✅ Save to Hive
-                      await _hiveService.register(newUser);
+                      await hiveService.register(newUser);
 
                       // Show success
                       SnackbarUtils.showSuccess(context, "Account Created Successfully");

@@ -12,7 +12,7 @@ class AuthHiveModel extends HiveObject {
   final String authId;
 
   @HiveField(1)
-  final String? fullName;
+  final String fullName;
 
   @HiveField(2)
   final String email;
@@ -21,7 +21,7 @@ class AuthHiveModel extends HiveObject {
   final String? phoneNumber;
 
   @HiveField(4)
-  final String? username;
+  final String username;
 
   @HiveField(5)
   final String? password;
@@ -29,35 +29,30 @@ class AuthHiveModel extends HiveObject {
   @HiveField(6)
   final String? profilePicture;
 
-  @HiveField(7)
-  final String? batchId;
-
   AuthHiveModel({
     String? authId,
-    this.fullName,
+    required this.fullName,
     required this.email,
     this.phoneNumber,
-    this.username,
+    required this.username,
     this.password,
     this.profilePicture,
-    this.batchId,
   }) : authId = authId ?? const Uuid().v4();
 
-  /// Convert Hive Model to Domain Entity
+  /// Convert Hive Model → Domain Entity
   AuthEntity toEntity() {
     return AuthEntity(
       authId: authId,
-      email: email,
-      password: password,
       fullName: fullName,
-      username: username,
+      email: email,
       phoneNumber: phoneNumber,
+      username: username,
+      password: password,
       profilePicture: profilePicture,
-      batchId: batchId,
     );
   }
 
-  /// Create Hive Model from Domain Entity
+  /// Convert Domain Entity → Hive Model
   factory AuthHiveModel.fromEntity(AuthEntity entity) {
     return AuthHiveModel(
       authId: entity.authId,
@@ -67,7 +62,6 @@ class AuthHiveModel extends HiveObject {
       username: entity.username,
       password: entity.password,
       profilePicture: entity.profilePicture,
-      batchId: entity.batchId,
     );
   }
 }

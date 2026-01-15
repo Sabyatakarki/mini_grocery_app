@@ -1,8 +1,9 @@
+import 'package:mini_grocery/features/auth/data/models/auth_api_model.dart';
 import 'package:mini_grocery/features/auth/data/models/auth_hive_model.dart';
 
-
-abstract class IAuthDataSource {
-  Future<void> register(AuthHiveModel user);
+/// Local datasource interface
+abstract class IAuthLocalDataSource {
+  Future<AuthHiveModel> register(AuthHiveModel user);
   Future<AuthHiveModel?> login(String email, String password);
   Future<AuthHiveModel?> getCurrentUser();
   Future<bool> logout();
@@ -10,4 +11,11 @@ abstract class IAuthDataSource {
   Future<AuthHiveModel?> getUserByEmail(String email);
   Future<bool> updateUser(AuthHiveModel user);
   Future<bool> deleteUser(String authId);
+}
+
+/// Remote datasource interface
+abstract class IAuthRemoteDataSource {
+  Future<AuthApiModel> register(AuthApiModel user);
+  Future<AuthApiModel?> login(String email, String password);
+  Future<AuthApiModel?> getUserById(String authId);
 }

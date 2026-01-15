@@ -15,7 +15,6 @@ class RegisterUsecaseParams extends Equatable {
   final String email;
   final String username;
   final String password;
-  final String? batchId;
   final String? phoneNumber;
 
   const RegisterUsecaseParams({
@@ -24,7 +23,6 @@ class RegisterUsecaseParams extends Equatable {
     required this.email,
     required this.username,
     required this.password,
-    this.batchId,
     this.phoneNumber,
   });
 
@@ -35,7 +33,6 @@ class RegisterUsecaseParams extends Equatable {
     email,
     username,
     password,
-    batchId,
     phoneNumber,
   ];
 }
@@ -61,7 +58,6 @@ class RegisterUsecase implements UsecaseWithParams<bool,RegisterUsecaseParams>{
       email: params.email,
       username: params.username,
       password: params.password,
-      batchId: params.batchId,
       phoneNumber: params.phoneNumber,
     );
     return  _authRepository.register(entity);
