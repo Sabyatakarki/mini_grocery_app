@@ -24,14 +24,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // ❌ no AppBar here (HomeScreen handles UI)
+      //appbar chaiye yeta code lekhne
       body: screens[_selectedIndex],
 
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.green,
-        unselectedItemColor: Colors.grey,
+        selectedItemColor: Colors.black54,
+        unselectedItemColor: Colors.white70,
 
         onTap: (index) {
           setState(() {
