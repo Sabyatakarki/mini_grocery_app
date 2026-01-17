@@ -26,7 +26,8 @@ class _HomeScreenState extends State<HomeScreen> {
               "Irresistible offers",
               style: TextStyle(
                 fontSize: 20,
-                fontWeight: FontWeight.bold,
+                fontFamily: 'OpenSansRegular'
+                
               ),
             ),
             const SizedBox(height: 12),
@@ -46,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
           "Make your life\nhealthy!!",
           style: TextStyle(
             fontSize: 24,
-            fontWeight: FontWeight.bold,
+            fontFamily: 'OpenSansbold'
           ),
         ),
         Icon(Icons.notifications_none, size: 28),
@@ -72,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   "Get your veggies\nat 15% off",
                   style: TextStyle(
                     fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                    fontFamily: 'OpenSansRegular'
                   ),
                 ),
                 const SizedBox(height: 10),
