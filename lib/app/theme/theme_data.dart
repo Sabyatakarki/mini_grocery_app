@@ -18,6 +18,6 @@ ThemeData getApplicationTheme() {
           borderRadius: BorderRadius.circular(5),
         ),
       ),
-    ),
+    ),  
   );
 }

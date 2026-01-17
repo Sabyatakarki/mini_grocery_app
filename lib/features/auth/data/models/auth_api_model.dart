@@ -25,7 +25,7 @@ class AuthApiModel {
   factory AuthApiModel.fromJson(Map<String, dynamic> json) {
     return AuthApiModel(
       id: json['_id'],
-      fullName: json['fullName'],
+      fullName: "${json['firstName']} ${json['lastName']}".trim(),
       email: json['email'],
       username: json['username'],
       phoneNumber: json['phoneNumber'],
@@ -35,13 +35,22 @@ class AuthApiModel {
   }
 
   // Model → API request (Signup / Login)
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJson({String? confirmPassword}) {
+    // Split fullName into firstName and lastName
+    final nameParts = fullName.split(' ');
+    final firstName = nameParts.first;
+    final lastName = nameParts.length > 1
+        ? nameParts.sublist(1).join(' ')
+        : '';
+
     return {
-      "fullName": fullName,
+      "firstName": firstName,
+      "lastName": lastName,
       "email": email,
       "username": username,
-      "phoneNumber": phoneNumber,
       "password": password,
+      "confirmPassword": confirmPassword ?? password, // use same password if confirm not provided
+      "phoneNumber": phoneNumber,
     };
   }
 

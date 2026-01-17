@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mini_grocery/core/services/hive/hive_service.dart';
-import 'package:mini_grocery/screens/dashboard_screen.dart';
-import 'package:mini_grocery/features/auth/presentation/pages/createaccountscreen.dart';
 import 'package:mini_grocery/core/utils/snackbar_utils.dart';
+import 'package:mini_grocery/features/auth/data/datasources/remote/auth_remote_datasource.dart';
+import 'package:mini_grocery/core/services/storage/user_session_service.dart';
+import 'package:mini_grocery/features/auth/presentation/pages/createaccountscreen.dart';
+import 'package:mini_grocery/screens/dashboard_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -20,45 +21,45 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _passwordVisible = false;
   bool _isLoading = false;
 
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
 
-    final hiveService = ref.read(hiveServiceProvider);
+    final authRemote = ref.read(authRemoteDatasourceProvider);
+    final userSession = ref.read(userSessionServiceProvider);
 
-    final email = _emailController.text.trim();
-    final password = _passwordController.text.trim();
-
-    // Check if user exists in Hive
-    final user = hiveService.login(email, password);
-
-    if (!mounted) return;
-
-    if (user != null) {
-      // Save login session so user won't have to login again
-      await hiveService.setLoginSession(user.authId);
-
-      SnackbarUtils.showSuccess(context, "Login successful");
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const DashboardScreen()),
+    try {
+      final user = await authRemote.login(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
       );
-    } else {
-      SnackbarUtils.showError(context, "Invalid email or password");
+
+      if (user != null) {
+        // Save session
+        await userSession.saveUserSession(
+          userId: user.id!,
+          email: user.email,
+          fullName: user.fullName,
+          username: user.username,
+        
+        );
+
+        SnackbarUtils.showSuccess(context, "Login successful");
+
+        if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const DashboardScreen()),
+        );
+      } else {
+        SnackbarUtils.showError(context, "Invalid email or password");
+      }
+    } catch (e) {
+      SnackbarUtils.showError(context, "Login failed: $e");
     }
 
-    if (mounted) {
-      setState(() => _isLoading = false);
-    }
+    if (mounted) setState(() => _isLoading = false);
   }
 
   @override
@@ -74,7 +75,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             height: screenHeight,
             child: Column(
               children: [
-                // BACK BUTTON
                 Align(
                   alignment: Alignment.centerLeft,
                   child: IconButton(
@@ -82,9 +82,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     onPressed: () => Navigator.pop(context),
                   ),
                 ),
-
                 SizedBox(height: screenHeight * 0.03),
-
                 const Column(
                   children: [
                     Text(
@@ -102,9 +100,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ],
                 ),
-
                 SizedBox(height: screenHeight * 0.04),
-
                 Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: screenWidth > 600 ? 120 : 25,
@@ -136,9 +132,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             return null;
                           },
                         ),
-
                         const SizedBox(height: 20),
-
                         const Text("Enter your password:"),
                         const SizedBox(height: 8),
                         TextFormField(
@@ -174,10 +168,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             return null;
                           },
                         ),
-
                         const SizedBox(height: 25),
-
-                        // LOGIN BUTTON
                         Center(
                           child: ElevatedButton(
                             onPressed: _isLoading ? null : _login,
@@ -201,9 +192,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   ),
                           ),
                         ),
-
                         const SizedBox(height: 15),
-
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -213,8 +202,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) =>
-                                        const Createaccountscreen(),
+                                    builder: (_) => const CreateAccountScreen(),
                                   ),
                                 );
                               },

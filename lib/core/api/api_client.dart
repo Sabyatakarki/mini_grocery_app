@@ -153,7 +153,7 @@ class _AuthInterceptor extends Interceptor {
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     final publicEndpoints = [
       ApiEndpoints.login,
-      ApiEndpoints.createAccount,
+      ApiEndpoints.register
     ];
 
     final isPublic = publicEndpoints.any((endpoint) => options.path.startsWith(endpoint));

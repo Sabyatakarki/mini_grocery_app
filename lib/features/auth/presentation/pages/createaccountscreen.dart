@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mini_grocery/core/utils/snackbar_utils.dart';
-import 'package:mini_grocery/features/auth/data/models/auth_hive_model.dart';
+import 'package:mini_grocery/features/auth/data/datasources/remote/auth_remote_datasource.dart';
+import 'package:mini_grocery/features/auth/data/models/auth_api_model.dart';
+import 'package:mini_grocery/core/services/storage/user_session_service.dart';
 import 'package:mini_grocery/features/auth/presentation/pages/loginpagescreen.dart';
-import 'package:mini_grocery/core/services/hive/hive_service.dart';
 
-class Createaccountscreen extends ConsumerStatefulWidget {
-  const Createaccountscreen({super.key});
+
+class CreateAccountScreen extends ConsumerStatefulWidget {
+  const CreateAccountScreen({super.key});
 
   @override
-  ConsumerState<Createaccountscreen> createState() => _CreateaccountscreenState();
+  ConsumerState<CreateAccountScreen> createState() =>
+      _CreateAccountScreenState();
 }
 
-class _CreateaccountscreenState extends ConsumerState<Createaccountscreen> {
+class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen> {
   final _formKey = GlobalKey<FormState>();
 
   final fullNameController = TextEditingController();
@@ -23,14 +26,6 @@ class _CreateaccountscreenState extends ConsumerState<Createaccountscreen> {
   bool _passwordVisible = false;
   bool _confirmPasswordVisible = false;
   bool _acceptTerms = false;
-
-  final HiveService _hiveService = HiveService();
-
-  @override
-  void initState() {
-    super.initState();
-    _hiveService.init(); // Initialize Hive once
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +51,6 @@ class _CreateaccountscreenState extends ConsumerState<Createaccountscreen> {
                     },
                   ),
                 ),
-
                 const Text(
                   "Create Account",
                   style: TextStyle(
@@ -73,10 +67,10 @@ class _CreateaccountscreenState extends ConsumerState<Createaccountscreen> {
                 ),
                 SizedBox(height: screenHeight * 0.03),
 
-                // FULL NAME
+                // USERNAME
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: const Text("Full Name:", style: TextStyle(fontSize: 14)),
+                  child: const Text("Username:", style: TextStyle(fontSize: 14)),
                 ),
                 const SizedBox(height: 8),
                 TextFormField(
@@ -91,7 +85,7 @@ class _CreateaccountscreenState extends ConsumerState<Createaccountscreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return "Full name is required";
+                      return "Username is required";
                     }
                     return null;
                   },
@@ -138,7 +132,9 @@ class _CreateaccountscreenState extends ConsumerState<Createaccountscreen> {
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
-                      icon: Icon(_passwordVisible ? Icons.visibility : Icons.visibility_off),
+                      icon: Icon(_passwordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off),
                       onPressed: () {
                         setState(() {
                           _passwordVisible = !_passwordVisible;
@@ -175,7 +171,9 @@ class _CreateaccountscreenState extends ConsumerState<Createaccountscreen> {
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
-                      icon: Icon(_confirmPasswordVisible ? Icons.visibility : Icons.visibility_off),
+                      icon: Icon(_confirmPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off),
                       onPressed: () {
                         setState(() {
                           _confirmPasswordVisible = !_confirmPasswordVisible;
@@ -225,37 +223,51 @@ class _CreateaccountscreenState extends ConsumerState<Createaccountscreen> {
                 // SIGN UP BUTTON
                 ElevatedButton(
                   onPressed: () async {
-                    if (_formKey.currentState!.validate()) {
-                      if (!_acceptTerms) {
-                        SnackbarUtils.showWarning(context, "Please accept Terms & Privacy Policy");
-                        return;
-                      }
+                    if (!_formKey.currentState!.validate()) return;
 
-                      final hiveService = ref.read(hiveServiceProvider);
-                      final email = emailController.text.trim();
+                    if (!_acceptTerms) {
+                      SnackbarUtils.showWarning(context,
+                          "Please accept Terms & Privacy Policy");
+                      return;
+                    }
 
-                      // ✅ Create new user
-                      final newUser = AuthHiveModel(
-                        fullName: fullNameController.text.trim(),
-                        email: email,
-                        username: email, // Use email as username
-                        password: passController.text.trim(),
+                    final authRemote =
+                        ref.read(authRemoteDatasourceProvider);
+                    final userSession =
+                        ref.read(userSessionServiceProvider);
+
+                    try {
+                      final newUser = await authRemote.register(
+                        AuthApiModel(
+                          fullName: fullNameController.text.trim(),
+                          email: emailController.text.trim(),
+                          username: emailController.text.trim(),
+                          password: passController.text.trim(),
+                        ),
                       );
 
-                      // ✅ Save to Hive
-                      await hiveService.register(newUser);
+                      // Save session locally
+                      await userSession.saveUserSession(
+                        userId: newUser.id!,
+                        email: newUser.email,
+                        fullName: newUser.fullName,
+                        username: newUser.username,
+                 
+                      );
 
-                      // Show success
-                      SnackbarUtils.showSuccess(context, "Account Created Successfully");
+                      SnackbarUtils.showSuccess(
+                          context, "Account Created Successfully");
 
                       Future.delayed(const Duration(seconds: 2), () {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const LoginScreen(),
-                          ),
+                              builder: (context) => const LoginScreen()),
                         );
                       });
+                    } catch (e) {
+                      SnackbarUtils.showError(
+                          context, "Failed to create account: $e");
                     }
                   },
                   style: ElevatedButton.styleFrom(

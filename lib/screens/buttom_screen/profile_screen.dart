@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mini_grocery/core/services/hive/hive_service.dart';
-import 'package:mini_grocery/screens/getstartedscreen.dart';
+import 'package:mini_grocery/features/auth/presentation/pages/createaccountscreen.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -45,7 +45,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(
-                builder: (_) => const GetStartedScreen(),
+                builder: (_) => const CreateAccountScreen(),
               ),
               (route) => false,
             );

@@ -52,7 +52,7 @@ class AuthRemoteDatasource implements IAuthRemoteDataSource {
   @override
   Future<AuthApiModel> register(AuthApiModel user) async {
     final response = await _apiClient.post(
-      ApiEndpoints.createAccount,
+      ApiEndpoints.register,
       data: user.toJson(),
     );
 
@@ -69,7 +69,7 @@ class AuthRemoteDatasource implements IAuthRemoteDataSource {
 
   @override
   Future<AuthApiModel?> getUserById(String authId) {
-    // Not implemented yet, optional for Sprint 4
+
     throw UnimplementedError();
   }
 }
