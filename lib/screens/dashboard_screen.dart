@@ -10,6 +10,7 @@ class DashboardScreen extends StatefulWidget {
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
+
 class _DashboardScreenState extends State<DashboardScreen> {
   int _selectedIndex = 0;
 
@@ -23,15 +24,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Dashboard Screen"),
-      ),
-
+      // ❌ no AppBar here (HomeScreen handles UI)
       body: screens[_selectedIndex],
 
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
+        selectedItemColor: Colors.green,
+        unselectedItemColor: Colors.grey,
 
         onTap: (index) {
           setState(() {
@@ -44,7 +44,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             icon: Icon(Icons.home),
             label: "Home",
           ),
-           BottomNavigationBarItem(
+          BottomNavigationBarItem(
             icon: Icon(Icons.category),
             label: "Categories",
           ),
