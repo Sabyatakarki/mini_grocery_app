@@ -19,6 +19,7 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen> {
 
   final TextEditingController fullNameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
   final TextEditingController passController = TextEditingController();
   final TextEditingController confirmPassController = TextEditingController();
 
@@ -31,6 +32,7 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen> {
   void dispose() {
     fullNameController.dispose();
     emailController.dispose();
+    phoneController.dispose();
     passController.dispose();
     confirmPassController.dispose();
     super.dispose();
@@ -58,6 +60,7 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen> {
           fullName: fullNameController.text.trim(),
           email: emailController.text.trim(),
           username: emailController.text.trim(),
+          phoneNumber: phoneController.text.trim(), // added phone
           password: passController.text.trim(),
         ),
       );
@@ -71,6 +74,8 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen> {
         email: newUser.email,
         fullName: newUser.fullName,
         username: newUser.username,
+        phoneNumber: newUser.phoneNumber,
+        
       );
 
       if (!mounted) return;
@@ -154,6 +159,21 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen> {
                   validator: (v) {
                     if (v == null || v.isEmpty) return "Email required";
                     if (!v.contains('@')) return "Invalid email";
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 20),
+
+                // PHONE NUMBER
+                _buildField(
+                  label: "Phone Number",
+                  controller: phoneController,
+                  icon: Icons.phone_outlined,
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return "Phone number required";
+                    final regex = RegExp(r'^\d{10}$'); // 10 digits
+                    if (!regex.hasMatch(v)) return "Phone Number must be 10 digits";
                     return null;
                   },
                 ),

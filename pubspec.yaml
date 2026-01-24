@@ -128,6 +128,6 @@ flutter:
 #this is the code to change the app icon
 flutter_launcher_icons:
   android: "launcher_icon"
-  image_path: "assets/icons/app_icons.png"
+  image_path: "assets/icons/sales.png"
   min_sdk_version: 21
   remove_alpha_ios: true
