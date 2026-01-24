@@ -52,7 +52,7 @@ dependencies:
   google_sign_in: ^7.2.0
   sign_in_with_apple: ^7.0.1
   
-  flutter_launcher_icons: ^0.14.4 
+  flutter_launcher_icons: ^0.14.4 #adding dependency for icon
 
 
 dev_dependencies:
