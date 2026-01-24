@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mini_grocery/core/services/hive/hive_service.dart';
-import 'package:mini_grocery/features/auth/presentation/pages/createaccountscreen.dart';
+import 'package:mini_grocery/core/services/storage/user_session_service.dart';
+import 'package:mini_grocery/screens/getstartedscreen.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -36,22 +37,35 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           );
 
           if (confirm == true) {
+            // Read both Hive and SharedPreferences services
             final hiveService = ref.read(hiveServiceProvider);
+            final userSession = ref.read(userSessionServiceProvider);
 
-            // Clear session
+            // Clear sessions
             await hiveService.clearLoginSession();
+            await userSession.clearSession();
 
             // Navigate to GetStartedScreen and remove backstack
             Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(
-                builder: (_) => const CreateAccountScreen(),
+                builder: (_) => const GetStartedScreen(),
               ),
               (route) => false,
             );
           }
         },
-        child: const Text('Logout'),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF6BAA44),
+          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: const Text(
+          'Logout',
+          style: TextStyle(fontSize: 16, color: Colors.white),
+        ),
       ),
     );
   }

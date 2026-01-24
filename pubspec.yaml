@@ -51,6 +51,9 @@ dependencies:
   jwt_decoder: ^2.0.1
   google_sign_in: ^7.2.0
   sign_in_with_apple: ^7.0.1
+  
+  flutter_launcher_icons: ^0.14.4 
+
 
 dev_dependencies:
   flutter_test:
@@ -120,3 +123,11 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  image_path: "assets/icons/app_icons.png"
+  min_sdk_version: 21
+  remove_alpha_ios: true

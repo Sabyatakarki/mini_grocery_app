@@ -60,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xffF4F66A),
+        color: const Color.fromARGB(255, 234, 237, 73),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -104,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // 🧺 Categories
+
   Widget _categories() {
     final categories = [
       {"icon": Icons.fastfood, "label": "Snacks"},
@@ -114,16 +114,16 @@ class _HomeScreenState extends State<HomeScreen> {
     ];
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 3),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: categories.map((cat) {
           return Column(
             children: [
               Container(
-                padding: const EdgeInsets.all(14),
+                padding: const EdgeInsets.all(15),
                 decoration: BoxDecoration(
-                  color: const Color(0xffF4F66A),
+                  color: const Color(0xffC7E85E),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Icon(cat["icon"] as IconData),
@@ -154,9 +154,9 @@ class _HomeScreenState extends State<HomeScreen> {
         itemCount: products.length,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          crossAxisSpacing: 16,
+          crossAxisSpacing: 20,
           mainAxisSpacing: 16,
-          childAspectRatio: 0.75,
+          childAspectRatio: 0.77,
         ),
         itemBuilder: (context, index) {
           final product = products[index];
@@ -164,7 +164,7 @@ class _HomeScreenState extends State<HomeScreen> {
           return Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: const Color.fromARGB(255, 252, 250, 250),
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
