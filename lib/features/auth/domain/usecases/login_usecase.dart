@@ -7,7 +7,6 @@ import 'package:mini_grocery/features/auth/data/repositories/auth_repository.dar
 import 'package:mini_grocery/features/auth/domain/entities/auth_entity.dart';
 import 'package:mini_grocery/features/auth/domain/repositories/auth_repository.dart';
 
-
 class LoginParams extends Equatable {
   final String email;
   final String password;
