@@ -2,35 +2,37 @@ import 'package:dio/dio.dart';
 import 'package:dio_smart_retry/dio_smart_retry.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:mini_grocery/core/api/api_endpoints.dart';
+import 'package:mini_grocery/core/services/storage/user_session_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
-// Provider for ApiClient
-final apiClientProvider = Provider<ApiClient>((ref) => ApiClient());
+/// ApiClient provider
+final apiClientProvider = Provider<ApiClient>((ref) {
+  final prefs = ref.read(sharedPreferencesProvider);
+  return ApiClient(prefs: prefs);
+});
 
 class ApiClient {
   late final Dio _dio;
-  final _storage = const FlutterSecureStorage();
-  static const String _tokenKey = 'auth_token';
+  final SharedPreferences _prefs;
 
-  ApiClient() {
+  ApiClient({required SharedPreferences prefs}) : _prefs = prefs {
     _dio = Dio(
       BaseOptions(
         baseUrl: ApiEndpoints.baseUrl,
         connectTimeout: ApiEndpoints.connectionTimeout,
         receiveTimeout: ApiEndpoints.receiveTimeout,
         headers: {
-          'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
       ),
     );
 
-    // Add interceptors
-    _dio.interceptors.add(_AuthInterceptor(_storage));
+    /// Auth interceptor
+    _dio.interceptors.add(AuthInterceptor(_prefs));
 
-    // Retry interceptor
+    /// Retry interceptor
     _dio.interceptors.add(
       RetryInterceptor(
         dio: _dio,
@@ -40,7 +42,7 @@ class ApiClient {
           Duration(seconds: 2),
           Duration(seconds: 3),
         ],
-        retryEvaluator: (error, attempt) {
+        retryEvaluator: (error, _) {
           return error.type == DioExceptionType.connectionTimeout ||
               error.type == DioExceptionType.sendTimeout ||
               error.type == DioExceptionType.receiveTimeout ||
@@ -49,14 +51,13 @@ class ApiClient {
       ),
     );
 
-    // Logger only in debug mode
+    /// Logger (debug only)
     if (kDebugMode) {
       _dio.interceptors.add(
         PrettyDioLogger(
           requestHeader: true,
           requestBody: true,
           responseBody: true,
-          responseHeader: false,
           error: true,
           compact: true,
         ),
@@ -66,20 +67,15 @@ class ApiClient {
 
   Dio get dio => _dio;
 
-  // ────────────────────────────────────────────────
-  // HTTP Methods
-  // ────────────────────────────────────────────────
+  // ---------------- BASIC REQUESTS ----------------
 
   Future<Response> get(
     String path, {
     Map<String, dynamic>? queryParameters,
     Options? options,
-  }) async {
-    return _dio.get(
-      path,
-      queryParameters: queryParameters,
-      options: options,
-    );
+  }) {
+    return _dio.get(path,
+        queryParameters: queryParameters, options: options);
   }
 
   Future<Response> post(
@@ -87,13 +83,9 @@ class ApiClient {
     dynamic data,
     Map<String, dynamic>? queryParameters,
     Options? options,
-  }) async {
-    return _dio.post(
-      path,
-      data: data,
-      queryParameters: queryParameters,
-      options: options,
-    );
+  }) {
+    return _dio.post(path,
+        data: data, queryParameters: queryParameters, options: options);
   }
 
   Future<Response> put(
@@ -101,13 +93,9 @@ class ApiClient {
     dynamic data,
     Map<String, dynamic>? queryParameters,
     Options? options,
-  }) async {
-    return _dio.put(
-      path,
-      data: data,
-      queryParameters: queryParameters,
-      options: options,
-    );
+  }) {
+    return _dio.put(path,
+        data: data, queryParameters: queryParameters, options: options);
   }
 
   Future<Response> delete(
@@ -115,54 +103,44 @@ class ApiClient {
     dynamic data,
     Map<String, dynamic>? queryParameters,
     Options? options,
-  }) async {
-    return _dio.delete(
-      path,
-      data: data,
-      queryParameters: queryParameters,
-      options: options,
-    );
+  }) {
+    return _dio.delete(path,
+        data: data, queryParameters: queryParameters, options: options);
   }
 
-  // Multipart / file upload
+  // ---------------- FILE UPLOAD ----------------
+
   Future<Response> uploadFile(
     String path, {
     required FormData formData,
-    Options? options,
     ProgressCallback? onSendProgress,
-  }) async {
+  }) {
     return _dio.post(
       path,
       data: formData,
-      options: options,
+      options: Options(
+        contentType: 'multipart/form-data',
+      ),
       onSendProgress: onSendProgress,
     );
   }
 }
 
-// ────────────────────────────────────────────────
-// Auth Interceptor (adds Bearer token + 401 handling)
-// ────────────────────────────────────────────────
-class _AuthInterceptor extends Interceptor {
-  final FlutterSecureStorage storage;
-  static const String _tokenKey = 'auth_token';
+/// ================= AUTH INTERCEPTOR =================
 
-  _AuthInterceptor(this.storage);
+class AuthInterceptor extends Interceptor {
+  final SharedPreferences prefs;
+  static const _tokenKey = 'auth_token';
+
+  AuthInterceptor(this.prefs);
 
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
-    final publicEndpoints = [
-      ApiEndpoints.login,
-      ApiEndpoints.register
-    ];
+  void onRequest(
+      RequestOptions options, RequestInterceptorHandler handler) {
+    final token = prefs.getString(_tokenKey);
 
-    final isPublic = publicEndpoints.any((endpoint) => options.path.startsWith(endpoint));
-
-    if (!isPublic) {
-      final token = await storage.read(key: _tokenKey);
-      if (token != null) {
-        options.headers['Authorization'] = 'Bearer $token';
-      }
+    if (token != null && token.isNotEmpty) {
+      options.headers['Authorization'] = 'Bearer $token';
     }
 
     handler.next(options);
@@ -170,11 +148,14 @@ class _AuthInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
+   
+    /// Backend bugs / expired routes can cause false 401s
+
     if (err.response?.statusCode == 401) {
-      await storage.delete(key: _tokenKey);
-      // You can add navigation / logout logic here if needed
-      // e.g. event bus, riverpod notifier, etc.
+      debugPrint("401 Unauthorized — token kept for safety");
+      // logout should be handled explicitly by auth flow
     }
+
     handler.next(err);
   }
 }

@@ -1,4 +1,4 @@
-- [x] Add dartz dependency to pubspec.yaml
-- [x] Add import 'package:dartz/dartz.dart'; to lib/features/auth/domain/repositories/auth_repository.dart
-- [ ] Run flutter pub get to install dependencies
-- [ ] Verify that the code compiles without errors
+# TODO: Fix Unauthorized JWT Missing Error in Update Profile
+
+- [x] Modify updateProfile method in ProfileRemoteDataSource to include JWT token in request data
+- [x] Test the update profile functionality (flutter analyze passed)

@@ -26,13 +26,14 @@ class AuthLocalDataSource {
 
   /// Login user
   Future<AuthHiveModel?> login(String email, String password) async {
-    final user = await _hiveService.login(email, password);
+    final user = _hiveService.login(email, password);
     if (user != null) {
       await _userSessionService.saveUserSession(
         userId: user.authId,
         email: user.email,
         fullName: user.fullName,
         username: user.username,
+        phoneNumber: user.phoneNumber,
       );
     }
     return user;
@@ -40,10 +41,10 @@ class AuthLocalDataSource {
 
   /// Get current logged in user
   Future<AuthHiveModel?> getCurrentUser() async {
-    final loggedIn = await _userSessionService.isLoggedIn();
+    final loggedIn = _userSessionService.isLoggedIn();
     if (!loggedIn) return null;
 
-    final userId = await _userSessionService.getCurrentUserId();
+    final userId = _userSessionService.getCurrentUserId();
     if (userId == null) return null;
 
     return _hiveService.getUserById(userId);
@@ -86,6 +87,6 @@ class AuthLocalDataSource {
 
   /// Get user by ID
   Future<AuthHiveModel?> getUserById(String authId) async {
-    return await _hiveService.getUserById(authId);
+    return _hiveService.getUserById(authId);
   }
 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mini_grocery/features/onboarding/presentation/pages/onboardingscreen.dart';
 import 'package:mini_grocery/core/services/hive/hive_service.dart';
-import 'package:mini_grocery/screens/dashboard_screen.dart';
+import 'package:mini_grocery/features/dashboard/presentation/pages/dashboard_screen.dart';
 
 class GetStartedScreen extends ConsumerStatefulWidget {
   const GetStartedScreen({super.key});

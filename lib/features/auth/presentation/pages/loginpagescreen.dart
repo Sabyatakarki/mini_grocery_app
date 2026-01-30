@@ -4,7 +4,7 @@ import 'package:mini_grocery/core/utils/snackbar_utils.dart';
 import 'package:mini_grocery/features/auth/data/datasources/remote/auth_remote_datasource.dart';
 import 'package:mini_grocery/core/services/storage/user_session_service.dart';
 import 'package:mini_grocery/features/auth/presentation/pages/createaccountscreen.dart';
-import 'package:mini_grocery/screens/dashboard_screen.dart';
+import 'package:mini_grocery/features/dashboard/presentation/pages/dashboard_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -42,6 +42,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           email: user.email,
           fullName: user.fullName,
           username: user.username,
+          token: user.token,
         
         );
 

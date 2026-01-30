@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:mini_grocery/screens/buttom_screen/cart_screen.dart';
-import 'package:mini_grocery/screens/buttom_screen/categories.dart';
-import 'package:mini_grocery/screens/buttom_screen/home_screen.dart';
-import 'package:mini_grocery/screens/buttom_screen/profile_screen.dart';
+import 'package:mini_grocery/features/dashboard/presentation/pages/cart_screen.dart';
+import 'package:mini_grocery/features/dashboard/presentation/pages/categories.dart';
+import 'package:mini_grocery/features/dashboard/presentation/pages/home_screen.dart';
+import 'package:mini_grocery/features/profile/presentation/pages/profile_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});

@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mini_grocery/core/api/api_client.dart';
 import 'package:mini_grocery/core/api/api_endpoints.dart';
@@ -42,6 +45,7 @@ class AuthRemoteDatasource implements IAuthRemoteDataSource {
         email: user.email,
         fullName: user.fullName,
         username: user.username,
+        token: user.token,
       );
 
       return AuthApiModel.fromEntity(user.toEntity());
@@ -66,6 +70,28 @@ class AuthRemoteDatasource implements IAuthRemoteDataSource {
     // fallback in case signup fails
     return AuthApiModel.fromEntity(user.toEntity());
   }
+
+    // ================= UPDATE PROFILE (IMAGE) =================
+  Future<void> uploadProfileImage(String userId, File image) async {
+  final formData = FormData.fromMap({
+    'profilePicture': await MultipartFile.fromFile(
+      image.path,
+      filename: image.path.split('/').last,
+    ),
+  });
+
+  final response = await _apiClient.put(
+    ApiEndpoints.updateProfile,
+    data: formData,
+    options: Options(
+      headers: {'Content-Type': 'multipart/form-data'},
+    ),
+  );
+
+  if (response.data['success'] != true) {
+    throw Exception('Upload failed');
+  }
+}
 
   @override
   Future<AuthApiModel?> getUserById(String authId) {

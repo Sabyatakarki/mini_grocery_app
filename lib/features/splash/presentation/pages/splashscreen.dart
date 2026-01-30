@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:mini_grocery/screens/getstartedscreen.dart';
-import 'package:mini_grocery/screens/dashboard_screen.dart';
+import 'package:mini_grocery/features/dashboard/presentation/pages/dashboard_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   final bool isLoggedIn;
