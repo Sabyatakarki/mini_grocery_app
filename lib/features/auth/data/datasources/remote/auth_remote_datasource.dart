@@ -72,7 +72,13 @@ class AuthRemoteDatasource implements IAuthRemoteDataSource {
   }
 
     // ================= UPDATE PROFILE (IMAGE) =================
+  @override
   Future<void> uploadProfileImage(String userId, File image) async {
+  final token = _userSessionService.getToken();
+  if (token == null || token.isEmpty) {
+    throw Exception("No token found");
+  }
+
   final formData = FormData.fromMap({
     'profilePicture': await MultipartFile.fromFile(
       image.path,
@@ -84,18 +90,21 @@ class AuthRemoteDatasource implements IAuthRemoteDataSource {
     ApiEndpoints.updateProfile,
     data: formData,
     options: Options(
-      headers: {'Content-Type': 'multipart/form-data'},
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'Authorization': 'Bearer $token', // ✅ this is the fix
+      },
     ),
   );
 
   if (response.data['success'] != true) {
-    throw Exception('Upload failed');
+    throw Exception(response.data['message'] ?? 'Upload failed');
   }
 }
 
   @override
   Future<AuthApiModel?> getUserById(String authId) {
-
+   
     throw UnimplementedError();
   }
 }

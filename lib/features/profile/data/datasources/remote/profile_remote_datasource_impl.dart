@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mini_grocery/core/api/api_client.dart';
 import 'package:mini_grocery/core/api/api_endpoints.dart';
 import 'package:mini_grocery/core/services/storage/user_session_service.dart';
-import 'package:mini_grocery/features/profile/data/datasources/remote/profile_remote_datasource.dart';
+import 'package:mini_grocery/features/profile/data/datasources/profile_datasource.dart';
 import 'package:mini_grocery/features/profile/data/models/profile_api_model.dart';
 
 final profileRemoteDataSourceProvider = Provider<IProfileRemoteDataSource>((ref) {
@@ -13,26 +13,21 @@ final profileRemoteDataSourceProvider = Provider<IProfileRemoteDataSource>((ref)
   final userSessionService = ref.read(userSessionServiceProvider);
   return ProfileRemoteDataSource(apiClient: apiClient, userSessionService: userSessionService);
 });
-
 class ProfileRemoteDataSource implements IProfileRemoteDataSource {
   final ApiClient _apiClient;
   final UserSessionService _userSessionService;
 
-  ProfileRemoteDataSource({required ApiClient apiClient, required UserSessionService userSessionService})
-      : _apiClient = apiClient,
-        _userSessionService = userSessionService;
+  ProfileRemoteDataSource({
+    required ApiClient apiClient,
+    required UserSessionService userSessionService,
+  }) : _apiClient = apiClient,
+       _userSessionService = userSessionService;
 
   @override
   Future<ProfileApiModel> updateProfile(ProfileApiModel profile) async {
-    final token = _userSessionService.getToken();
-    final data = {
-      ...profile.toJson(),
-      if (token != null) 'token': token,
-    };
-
     final response = await _apiClient.dio.post(
       ApiEndpoints.updateProfile,
-      data: data,
+      data: profile.toJson(), // ✅ NO TOKEN HERE
     );
 
     if (response.data['success'] == true) {
@@ -45,17 +40,26 @@ class ProfileRemoteDataSource implements IProfileRemoteDataSource {
   @override
   Future<String> uploadProfilePicture(File imageFile) async {
     final token = _userSessionService.getToken();
+    if (token == null || token.isEmpty) {
+      throw Exception("No token found");
+    }
+
     final formData = FormData.fromMap({
       'profilePicture': await MultipartFile.fromFile(
         imageFile.path,
         filename: imageFile.path.split('/').last,
       ),
-      if (token != null) 'token': token,
     });
 
-    final response = await _apiClient.uploadFile(
+    final response = await _apiClient.dio.post(
       ApiEndpoints.updateProfile,
-      formData: formData,
+      data: formData,
+      options: Options(
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Authorization': 'Bearer $token',
+        },
+      ),
     );
 
     if (response.data['success'] == true) {

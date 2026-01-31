@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:mini_grocery/features/auth/data/models/auth_api_model.dart';
 import 'package:mini_grocery/features/auth/data/models/auth_hive_model.dart';
 
@@ -18,4 +20,5 @@ abstract class IAuthRemoteDataSource {
   Future<AuthApiModel> register(AuthApiModel user);
   Future<AuthApiModel?> login(String email, String password);
   Future<AuthApiModel?> getUserById(String authId);
+  Future<void> uploadProfileImage(String userId, File image);
 }

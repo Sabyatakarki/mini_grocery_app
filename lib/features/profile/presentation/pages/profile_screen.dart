@@ -25,7 +25,6 @@ class ProfileScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Profile"), centerTitle: true),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

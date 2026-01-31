@@ -116,7 +116,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     final state = ref.watch(profileViewModelProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Edit Profile")),
+      
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(

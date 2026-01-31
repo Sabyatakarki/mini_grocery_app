@@ -3,6 +3,7 @@ import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:mini_grocery/core/constants/hive_table_constant.dart';
 import 'package:mini_grocery/features/auth/data/models/auth_hive_model.dart';
+import 'package:mini_grocery/features/profile/data/models/profile_hive_model.dart';
 
 final hiveServiceProvider = Provider<HiveService>((ref) {
   return HiveService();
@@ -20,14 +21,24 @@ class HiveService {
       Hive.registerAdapter(AuthHiveModelAdapter());
     }
 
+    if (!Hive.isAdapterRegistered(HiveTableConstant.profileTypeId)) {
+      Hive.registerAdapter(ProfileHiveModelAdapter());
+    }
+
     if (!Hive.isBoxOpen(HiveTableConstant.authTable)) {
       await Hive.openBox<AuthHiveModel>(HiveTableConstant.authTable);
+    }
+
+    if (!Hive.isBoxOpen(HiveTableConstant.profileTable)) {
+      await Hive.openBox<ProfileHiveModel>(HiveTableConstant.profileTable);
     }
 
     _initialized = true;
   }
 
   Box<AuthHiveModel> get _authBox => Hive.box<AuthHiveModel>(HiveTableConstant.authTable);
+
+  Box<ProfileHiveModel> get _profileBox => Hive.box<ProfileHiveModel>(HiveTableConstant.profileTable);
 
   // ================= AUTH =================
   Future<AuthHiveModel> register(AuthHiveModel user) async {
@@ -70,6 +81,35 @@ class HiveService {
 
   Future<void> deleteUser(String authId) async {
     await _authBox.delete(authId);
+  }
+
+  // ================= PROFILE =================
+  Future<ProfileHiveModel?> getProfileByUserId(String userId) async {
+    await init();
+    try {
+      return _profileBox.get(userId);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> saveProfile(ProfileHiveModel profile) async {
+    await init();
+    await _profileBox.put(profile.userId, profile);
+  }
+
+  Future<bool> updateProfile(ProfileHiveModel profile) async {
+    await init();
+    if (profile.userId != null && _profileBox.containsKey(profile.userId)) {
+      await _profileBox.put(profile.userId, profile);
+      return true;
+    }
+    return false;
+  }
+
+  Future<void> deleteProfile(String userId) async {
+    await init();
+    await _profileBox.delete(userId);
   }
 
   // ================= SESSION =================
