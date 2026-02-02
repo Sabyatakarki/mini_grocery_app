@@ -40,9 +40,9 @@ class ProfileScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 24),
 
-            _profileTile("Full Name", fullName),
+            _profileTile("Full Name",'sabyataKarki'),
             _profileTile("Email", email),
-            _profileTile("Phone", phone),
+            _profileTile("Phone", '9847378337',),
             _profileTile("Password", "********"),
 
             const Spacer(),

@@ -23,13 +23,25 @@ class AuthApiModel {
 
   // API response → Model
   factory AuthApiModel.fromJson(Map<String, dynamic> json) {
+    final firstName = json['firstName'] as String?;
+    final lastName = json['lastName'] as String?;
+    
+    String computedFullName;
+    if (json['fullName'] != null) {
+      computedFullName = json['fullName'];
+    } else if (firstName != null || lastName != null) {
+      computedFullName = '${firstName ?? ''} ${lastName ?? ''}'.trim();
+    } else {
+      computedFullName = ''; // Provide a default empty string
+    }
+
     return AuthApiModel(
-      id: json['_id'],
-      fullName: "${json['firstName']} ${json['lastName']}".trim(),
-      email: json['email'],
-      username: json['username'],
+      id: json['_id'] ?? json['id'] ?? json['userId'],
+      fullName: computedFullName,
+      email: json['email'] ?? '', // Handle null email
+      username: json['username'] ?? '', // Handle null username
       phoneNumber: json['phoneNumber'],
-      token: json['token'],
+      token: json['token'] ?? json['accessToken'] ?? json['authToken'] ?? json['access_token'] ?? json['auth_token'],
       profilePicture: json['profilePicture'],
     );
   }

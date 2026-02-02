@@ -38,6 +38,7 @@ class UserSessionService {
     String? profilePicture,
     String? token,
   }) async {
+    print('Saving user session with token: $token'); // Debug: log the token being saved
     await _prefs.setBool(_keyIsLoggedIn, true);
     await _prefs.setString(_keyUserId, userId);
     await _prefs.setString(_keyUserEmail, email);
@@ -50,8 +51,8 @@ class UserSessionService {
       await _prefs.setString(_keyUserProfilePicture, profilePicture);
     }
     if (token != null && token.isNotEmpty) {
-    await _prefs.setString(_keyAuthToken, token); //SAVE TOKEN
-  }
+      await _prefs.setString(_keyAuthToken, token); //SAVE TOKEN
+    }
   }
 
   // Session check methods

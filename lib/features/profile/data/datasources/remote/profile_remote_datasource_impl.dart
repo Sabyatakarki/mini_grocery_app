@@ -8,11 +8,17 @@ import 'package:mini_grocery/core/services/storage/user_session_service.dart';
 import 'package:mini_grocery/features/profile/data/datasources/profile_datasource.dart';
 import 'package:mini_grocery/features/profile/data/models/profile_api_model.dart';
 
-final profileRemoteDataSourceProvider = Provider<IProfileRemoteDataSource>((ref) {
+final profileRemoteDataSourceProvider =
+    Provider<IProfileRemoteDataSource>((ref) {
   final apiClient = ref.read(apiClientProvider);
   final userSessionService = ref.read(userSessionServiceProvider);
-  return ProfileRemoteDataSource(apiClient: apiClient, userSessionService: userSessionService);
+
+  return ProfileRemoteDataSource(
+    apiClient: apiClient,
+    userSessionService: userSessionService,
+  );
 });
+
 class ProfileRemoteDataSource implements IProfileRemoteDataSource {
   final ApiClient _apiClient;
   final UserSessionService _userSessionService;
@@ -20,20 +26,32 @@ class ProfileRemoteDataSource implements IProfileRemoteDataSource {
   ProfileRemoteDataSource({
     required ApiClient apiClient,
     required UserSessionService userSessionService,
-  }) : _apiClient = apiClient,
-       _userSessionService = userSessionService;
+  })  : _apiClient = apiClient,
+        _userSessionService = userSessionService;
 
   @override
   Future<ProfileApiModel> updateProfile(ProfileApiModel profile) async {
+    final token = _userSessionService.getToken();
+    if (token == null || token.isEmpty) {
+      throw Exception("No token found");
+    }
+
     final response = await _apiClient.dio.post(
       ApiEndpoints.updateProfile,
-      data: profile.toJson(), // ✅ NO TOKEN HERE
+      data: profile.toJson(),
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      ),
     );
 
-    if (response.data['success'] == true) {
+    if (response.data != null && response.data['success'] == true) {
       return ProfileApiModel.fromJson(response.data['data']);
     } else {
-      throw Exception(response.data['message'] ?? 'Failed to update profile');
+      throw Exception(
+        response.data?['message'] ?? 'Failed to update profile',
+      );
     }
   }
 
@@ -56,16 +74,21 @@ class ProfileRemoteDataSource implements IProfileRemoteDataSource {
       data: formData,
       options: Options(
         headers: {
-          'Content-Type': 'multipart/form-data',
           'Authorization': 'Bearer $token',
         },
       ),
     );
 
-    if (response.data['success'] == true) {
-      return response.data['data']['profilePicture'];
+    if (response.data != null && response.data['success'] == true) {
+      final profilePicture = response.data['data']?['profilePicture'] as String?;
+      if (profilePicture != null) {
+        return profilePicture;
+      }
+      throw Exception('Profile picture URL not returned from server');
     } else {
-      throw Exception(response.data['message'] ?? 'Failed to upload profile picture');
+      throw Exception(
+        response.data?['message'] ?? 'Failed to upload profile picture',
+      );
     }
   }
 }

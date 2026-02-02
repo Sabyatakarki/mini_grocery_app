@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -23,9 +25,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     super.initState();
     final profile = ref.read(profileViewModelProvider).profile;
 
-    _fullNameController = TextEditingController(text: profile?.fullName ?? '');
-    _emailController = TextEditingController(text: profile?.email ?? '');
-    _phoneController = TextEditingController(text: profile?.phoneNumber ?? '');
+    _fullNameController =
+        TextEditingController(text: profile?.fullName ?? '');
+    _emailController =
+        TextEditingController(text: profile?.email ?? '');
+    _phoneController =
+        TextEditingController(text: profile?.phoneNumber ?? '');
   }
 
   @override
@@ -73,28 +78,28 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     );
   }
 
-  // ───────────── SAVE TEXT FIELDS ─────────────
+  // ───────────── SAVE PROFILE ─────────────
   Future<void> _saveChanges() async {
     if (!_formKey.currentState!.validate()) return;
 
     final viewModel = ref.read(profileViewModelProvider.notifier);
 
-    // This will automatically attach JWT from SharedPreferences
     await viewModel.updateProfile(
-      fullName: _fullNameController.text,
-      email: _emailController.text,
-      phoneNumber: _phoneController.text,
+      fullName: _fullNameController.text.trim(),
+      email: _emailController.text.trim(),
+      phoneNumber: _phoneController.text.trim(),
     );
 
     final state = ref.read(profileViewModelProvider);
+
+    if (!mounted) return;
+
     if (state.status == ProfileStatus.success) {
-      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Profile updated successfully")),
       );
       Navigator.pop(context);
     } else if (state.errorMessage != null) {
-      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(state.errorMessage!)),
       );
@@ -103,10 +108,14 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   // ───────────── PROFILE IMAGE ─────────────
   ImageProvider? _getProfileImage(ProfileState state) {
-    if (state.pickedImage != null) return FileImage(state.pickedImage!);
+    if (state.pickedImage != null) {
+      return FileImage(state.pickedImage!);
+    }
 
     final url = state.profile?.profilePicture;
-    if (url != null && url.startsWith('http')) return NetworkImage(url);
+    if (url != null && url.isNotEmpty) {
+      return NetworkImage(url);
+    }
 
     return null;
   }
@@ -116,7 +125,14 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     final state = ref.watch(profileViewModelProvider);
 
     return Scaffold(
-      
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text("Edit Profile"),
+        centerTitle: true,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -125,6 +141,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             children: [
               Center(
                 child: Stack(
+                  alignment: Alignment.center,
                   children: [
                     CircleAvatar(
                       radius: 55,
@@ -136,7 +153,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     ),
                     if (state.isUploadingImage)
                       const Positioned.fill(
-                        child: CircularProgressIndicator(),
+                        child: Center(
+                          child: CircularProgressIndicator(),
+                        ),
                       ),
                     Positioned(
                       bottom: 0,
@@ -159,14 +178,16 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               _buildTextField("Phone", _phoneController),
               const SizedBox(height: 40),
               ElevatedButton(
-                onPressed: state.status == ProfileStatus.loading ? null : _saveChanges,
+                onPressed: (state.status == ProfileStatus.loading || state.isUploadingImage)
+                    ? null
+                    : _saveChanges,
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: state.status == ProfileStatus.loading
+                child: (state.status == ProfileStatus.loading || state.isUploadingImage)
                     ? const CircularProgressIndicator(color: Colors.white)
                     : const Text("Save Changes"),
               ),
@@ -184,9 +205,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         controller: controller,
         decoration: InputDecoration(
           labelText: label,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
-        validator: (value) => value == null || value.isEmpty ? "Required" : null,
+        validator: (value) =>
+            value == null || value.isEmpty ? "Required" : null,
       ),
     );
   }

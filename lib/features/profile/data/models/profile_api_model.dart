@@ -4,16 +4,16 @@ import 'package:mini_grocery/features/profile/domain/entities/profile_entity.dar
 
 class ProfileApiModel {
   final String? userId;
-  final String fullName;
+  final String? fullName; 
   final String email;
   final String username;
   final String? phoneNumber;
   final String? profilePicture;
-  final File? profilePictureFile; // For upload
+  final File? profilePictureFile;
 
   ProfileApiModel({
     this.userId,
-    required this.fullName,
+    this.fullName,
     required this.email,
     required this.username,
     this.phoneNumber,
@@ -21,24 +21,38 @@ class ProfileApiModel {
     this.profilePictureFile,
   });
 
-  // API response → Model
+
   factory ProfileApiModel.fromJson(Map<String, dynamic> json) {
+    final firstName = json['firstName'];
+    final lastName = json['lastName'];
+
+    String? computedFullName;
+
+    if (json['fullName'] != null) {
+      computedFullName = json['fullName'];
+    } else if (firstName != null || lastName != null) {
+      computedFullName =
+          '${firstName ?? ''} ${lastName ?? ''}'.trim();
+    } else {
+      computedFullName = null;
+    }
+
     return ProfileApiModel(
       userId: json['_id'] ?? json['userId'],
-      fullName: json['fullName'] ?? "${json['firstName']} ${json['lastName']}".trim(),
-      email: json['email'],
-      username: json['username'],
+      fullName: computedFullName,
+      email: json['email'] ?? '',       
+      username: json['username'] ?? '', 
       phoneNumber: json['phoneNumber'],
       profilePicture: json['profilePicture'],
     );
   }
 
-  // Model → API request (Update Profile)
+  // Model → API request
   Map<String, dynamic> toJson() {
-    // Split fullName into firstName and lastName
-    final nameParts = fullName.split(' ');
-    final firstName = nameParts.first;
-    final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+    final nameParts = (fullName ?? '').split(' ');
+    final firstName = nameParts.isNotEmpty ? nameParts.first : '';
+    final lastName =
+        nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
 
     return {
       "firstName": firstName,
@@ -53,7 +67,7 @@ class ProfileApiModel {
   ProfileEntity toEntity() {
     return ProfileEntity(
       userId: userId,
-      fullName: fullName,
+      fullName: fullName ?? '',
       email: email,
       username: username,
       phoneNumber: phoneNumber,
@@ -62,7 +76,10 @@ class ProfileApiModel {
   }
 
   // Entity → API Model
-  factory ProfileApiModel.fromEntity(ProfileEntity entity, {File? profilePictureFile}) {
+  factory ProfileApiModel.fromEntity(
+    ProfileEntity entity, {
+    File? profilePictureFile,
+  }) {
     return ProfileApiModel(
       userId: entity.userId,
       fullName: entity.fullName,

@@ -42,7 +42,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           email: user.email,
           fullName: user.fullName,
           username: user.username,
-          token: user.token,
+         
         
         );
 

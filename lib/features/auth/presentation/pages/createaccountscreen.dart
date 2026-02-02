@@ -65,8 +65,9 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen> {
         ),
       );
 
-      if (newUser.id == null) {
-        throw Exception("Registration failed. Check your data.");
+      if (newUser.id == null || newUser.id!.isEmpty) {
+        SnackbarUtils.showError(context, "Registration failed: User ID not found");
+        return;
       }
 
       await userSession.saveUserSession(

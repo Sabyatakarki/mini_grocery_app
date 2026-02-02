@@ -92,7 +92,7 @@ class AuthRemoteDatasource implements IAuthRemoteDataSource {
     options: Options(
       headers: {
         'Content-Type': 'multipart/form-data',
-        'Authorization': 'Bearer $token', // ✅ this is the fix
+        'Authorization': 'Bearer $token', 
       },
     ),
   );

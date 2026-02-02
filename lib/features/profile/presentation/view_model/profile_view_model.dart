@@ -41,7 +41,7 @@ class ProfileViewModel extends Notifier<ProfileState> {
   }
 
   // ─────────────────────────────────────────────
-  // IMAGE PICK + UPLOAD
+  // IMAGE PICK (NO AUTO UPLOAD)
   // ─────────────────────────────────────────────
   Future<void> pickImage(ImageSource source) async {
     try {
@@ -54,56 +54,26 @@ class ProfileViewModel extends Notifier<ProfileState> {
 
       final imageFile = File(pickedFile.path);
 
-      // Show preview immediately
+      // Just store the image locally for preview, don't upload yet
       state = state.copyWith(
         pickedImage: imageFile,
-        isUploadingImage: true,
         errorMessage: null,
       );
-
-      await _uploadProfilePicture(imageFile);
     } catch (e) {
       debugPrint("Pick image error: $e");
       state = state.copyWith(
-        isUploadingImage: false,
-        errorMessage: "Image upload failed",
+        errorMessage: "Failed to pick image",
       );
     }
   }
 
-  Future<void> _uploadProfilePicture(File imageFile) async {
+  Future<String?> _uploadProfilePicture(File imageFile) async {
     final params = UploadProfilePictureParams(imageFile: imageFile);
     final result = await _uploadProfilePictureUseCase(params);
 
-    result.fold(
-      (failure) {
-        state = state.copyWith(
-          isUploadingImage: false,
-          errorMessage: failure.message,
-        );
-      },
-      (imageUrl) async {
-        final currentProfile = state.profile!;
-        final token = _userSessionService.getToken(); // 🔥 KEEP TOKEN
-
-        // Update local session (DO NOT overwrite token)
-        await _userSessionService.saveUserSession(
-          userId: currentProfile.userId!,
-          fullName: currentProfile.fullName,
-          email: currentProfile.email,
-          username: currentProfile.username,
-          phoneNumber: currentProfile.phoneNumber,
-          profilePicture: imageUrl,
-          token: token,
-        );
-
-        state = state.copyWith(
-          profile: currentProfile.copyWith(profilePicture: imageUrl),
-          pickedImage: null,
-          isUploadingImage: false,
-          errorMessage: null,
-        );
-      },
+    return result.fold(
+      (failure) => throw Exception(failure.message),
+      (imageUrl) => imageUrl,
     );
   }
 
@@ -139,6 +109,20 @@ class ProfileViewModel extends Notifier<ProfileState> {
       (profile) async {
         final token = _userSessionService.getToken(); // 🔥 KEEP TOKEN
 
+        // If there's a picked image, upload it now
+        String? uploadedImageUrl;
+        if (state.pickedImage != null) {
+          try {
+            state = state.copyWith(isUploadingImage: true);
+            uploadedImageUrl = await _uploadProfilePicture(state.pickedImage!);
+          } catch (e) {
+            debugPrint("Image upload failed: $e");
+            // Continue with profile update even if image upload fails
+          } finally {
+            state = state.copyWith(isUploadingImage: false);
+          }
+        }
+
         // Update local session safely
         await _userSessionService.saveUserSession(
           userId: profile.userId!,
@@ -146,13 +130,14 @@ class ProfileViewModel extends Notifier<ProfileState> {
           email: profile.email,
           username: profile.username,
           phoneNumber: profile.phoneNumber,
-          profilePicture: profile.profilePicture,
+          profilePicture: uploadedImageUrl ?? profile.profilePicture,
           token: token,
         );
 
         state = state.copyWith(
           status: ProfileStatus.success,
-          profile: profile,
+          profile: profile.copyWith(profilePicture: uploadedImageUrl ?? profile.profilePicture),
+          pickedImage: null, // Clear the picked image after successful upload
           errorMessage: null,
         );
       },
