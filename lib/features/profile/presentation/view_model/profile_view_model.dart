@@ -77,9 +77,7 @@ class ProfileViewModel extends Notifier<ProfileState> {
     );
   }
 
-  // ─────────────────────────────────────────────
-  // UPDATE PROFILE (TEXT FIELDS)
-  // ─────────────────────────────────────────────
+
   Future<void> updateProfile({
     required String fullName,
     required String email,
