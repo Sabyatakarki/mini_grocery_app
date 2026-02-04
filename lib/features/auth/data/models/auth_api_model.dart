@@ -21,52 +21,56 @@ class AuthApiModel {
     this.profilePicture,
   });
 
-  // API response → Model
+  /// Convert API JSON → Model
   factory AuthApiModel.fromJson(Map<String, dynamic> json) {
+    // Compute fullName
     final firstName = json['firstName'] as String?;
     final lastName = json['lastName'] as String?;
-    
+
     String computedFullName;
     if (json['fullName'] != null) {
       computedFullName = json['fullName'];
     } else if (firstName != null || lastName != null) {
       computedFullName = '${firstName ?? ''} ${lastName ?? ''}'.trim();
     } else {
-      computedFullName = ''; // Provide a default empty string
+      computedFullName = '';
     }
 
+    // token might come at top-level or inside data object
+    String? token;
+    if (json.containsKey('token')) {
+      token = json['token'];
+    } else if (json['data'] != null && json['data']['token'] != null) {
+      token = json['data']['token'];
+    }
+
+    // main data object
+    final data = json['data'] ?? json;
+
     return AuthApiModel(
-      id: json['_id'] ?? json['id'] ?? json['userId'],
+      id: data['_id'] ?? data['id'] ?? data['userId'],
       fullName: computedFullName,
-      email: json['email'] ?? '', // Handle null email
-      username: json['username'] ?? '', // Handle null username
-      phoneNumber: json['phoneNumber'],
-      token: json['token'] ?? json['accessToken'] ?? json['authToken'] ?? json['access_token'] ?? json['auth_token'],
-      profilePicture: json['profilePicture'],
+      email: data['email'] ?? '',
+      username: data['username'] ?? '',
+      phoneNumber: data['phoneNumber'],
+      token: token,
+      profilePicture: data['profilePicture'],
     );
   }
 
-  // Model → API request (Signup / Login)
+  /// Model → API request
   Map<String, dynamic> toJson({String? confirmPassword}) {
-    // Split fullName into firstName and lastName
-    final nameParts = fullName.split(' ');
-    final firstName = nameParts.first;
-    final lastName = nameParts.length > 1
-        ? nameParts.sublist(1).join(' ')
-        : '';
-
     return {
-      "firstName": firstName,
-      "lastName": lastName,
+      "fullName": fullName,
       "email": email,
       "username": username,
       "password": password,
-      "confirmPassword": confirmPassword ?? password, // use same password if confirm not provided
+      "confirmPassword": confirmPassword ?? password,
       "phoneNumber": phoneNumber,
     };
   }
 
-  // API Model → Domain Entity
+  /// Model → Domain Entity
   AuthEntity toEntity() {
     return AuthEntity(
       authId: id,
@@ -80,7 +84,7 @@ class AuthApiModel {
     );
   }
 
-  // Entity → API Model
+  /// Entity → Model
   factory AuthApiModel.fromEntity(AuthEntity entity) {
     return AuthApiModel(
       id: entity.authId,

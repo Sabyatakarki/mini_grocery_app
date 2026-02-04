@@ -1,15 +1,14 @@
 import 'dart:io';
-
 import 'package:mini_grocery/features/profile/domain/entities/profile_entity.dart';
 
 class ProfileApiModel {
   final String? userId;
-  final String? fullName; 
+  final String? fullName;
   final String email;
   final String username;
   final String? phoneNumber;
   final String? profilePicture;
-  final File? profilePictureFile;
+  final File? profilePictureFile; // used when uploading new image
 
   ProfileApiModel({
     this.userId,
@@ -21,7 +20,7 @@ class ProfileApiModel {
     this.profilePictureFile,
   });
 
-
+  // ───────────── FROM JSON ─────────────
   factory ProfileApiModel.fromJson(Map<String, dynamic> json) {
     final firstName = json['firstName'];
     final lastName = json['lastName'];
@@ -40,30 +39,37 @@ class ProfileApiModel {
     return ProfileApiModel(
       userId: json['_id'] ?? json['userId'],
       fullName: computedFullName,
-      email: json['email'] ?? '',       
-      username: json['username'] ?? '', 
+      email: json['email'] ?? '',
+      username: json['username'] ?? '',
       phoneNumber: json['phoneNumber'],
       profilePicture: json['profilePicture'],
     );
   }
 
-  // Model → API request
-  Map<String, dynamic> toJson() {
+  // ───────────── TO JSON ─────────────
+  Map<String, dynamic> toJson({bool includeImageFile = false}) {
     final nameParts = (fullName ?? '').split(' ');
     final firstName = nameParts.isNotEmpty ? nameParts.first : '';
     final lastName =
         nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
 
-    return {
+    final data = {
       "firstName": firstName,
       "lastName": lastName,
       "email": email,
       "username": username,
       "phoneNumber": phoneNumber,
     };
+
+    // Include image file only if uploading
+    if (includeImageFile && profilePictureFile != null) {
+      data['profilePicture'] = profilePictureFile!.path;
+    }
+
+    return data;
   }
 
-  // API Model → Domain Entity
+  // ───────────── TO ENTITY ─────────────
   ProfileEntity toEntity() {
     return ProfileEntity(
       userId: userId,
@@ -75,7 +81,7 @@ class ProfileApiModel {
     );
   }
 
-  // Entity → API Model
+  // ───────────── FROM ENTITY ─────────────
   factory ProfileApiModel.fromEntity(
     ProfileEntity entity, {
     File? profilePictureFile,

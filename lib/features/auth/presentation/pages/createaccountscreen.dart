@@ -49,6 +49,12 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen> {
       return;
     }
 
+    final fullName = fullNameController.text.trim();
+    if (fullName.isEmpty) {
+      SnackbarUtils.showError(context, "Full name is required");
+      return;
+    }
+
     setState(() => _isLoading = true);
 
     final authRemote = ref.read(authRemoteDatasourceProvider);
@@ -57,7 +63,7 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen> {
     try {
       final newUser = await authRemote.register(
         AuthApiModel(
-          fullName: fullNameController.text.trim(),
+          fullName: fullName,
           email: emailController.text.trim(),
           username: emailController.text.trim(),
           phoneNumber: phoneController.text.trim(), // added phone

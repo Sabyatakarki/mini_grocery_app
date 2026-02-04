@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -27,8 +25,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
     _fullNameController =
         TextEditingController(text: profile?.fullName ?? '');
-    _emailController =
-        TextEditingController(text: profile?.email ?? '');
+    _emailController = TextEditingController(text: profile?.email ?? '');
     _phoneController =
         TextEditingController(text: profile?.phoneNumber ?? '');
   }
@@ -178,7 +175,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               _buildTextField("Phone", _phoneController),
               const SizedBox(height: 40),
               ElevatedButton(
-                onPressed: (state.status == ProfileStatus.loading || state.isUploadingImage)
+                onPressed: (state.status == ProfileStatus.loading ||
+                        state.isUploadingImage)
                     ? null
                     : _saveChanges,
                 style: ElevatedButton.styleFrom(
@@ -187,7 +185,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: (state.status == ProfileStatus.loading || state.isUploadingImage)
+                child: (state.status == ProfileStatus.loading ||
+                        state.isUploadingImage)
                     ? const CircularProgressIndicator(color: Colors.white)
                     : const Text("Save Changes"),
               ),

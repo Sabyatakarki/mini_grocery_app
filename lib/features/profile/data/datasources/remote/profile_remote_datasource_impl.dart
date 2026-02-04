@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mini_grocery/core/api/api_client.dart';
@@ -29,37 +28,57 @@ class ProfileRemoteDataSource implements IProfileRemoteDataSource {
   })  : _apiClient = apiClient,
         _userSessionService = userSessionService;
 
+  /// Update profile with optional image
   @override
-  Future<ProfileApiModel> updateProfile(ProfileApiModel profile) async {
+  Future<ProfileApiModel> updateProfile(ProfileApiModel profile, {File? imageFile}) async {
     final token = _userSessionService.getToken();
     if (token == null || token.isEmpty) {
-      throw Exception("No token found");
+      throw Exception("No token found. Please login again.");
     }
 
+    // Prepare form data
+    final Map<String, dynamic> formDataMap = {
+      'fullName': profile.fullName,
+      'email': profile.email,
+      'phoneNumber': profile.phoneNumber ?? '',
+      'username': profile.username ?? '',
+    };
+
+    if (imageFile != null) {
+      formDataMap['profilePicture'] = await MultipartFile.fromFile(
+        imageFile.path,
+        filename: imageFile.path.split('/').last,
+      );
+    }
+
+    final formData = FormData.fromMap(formDataMap);
+
+    // Send request
     final response = await _apiClient.dio.post(
       ApiEndpoints.updateProfile,
-      data: profile.toJson(),
+      data: formData,
       options: Options(
         headers: {
-          'Authorization': 'Bearer $token',
+          'Authorization': 'Bearer $token', // <-- Token added here
+          'Content-Type': 'multipart/form-data',
         },
       ),
     );
 
+    // Check response
     if (response.data != null && response.data['success'] == true) {
       return ProfileApiModel.fromJson(response.data['data']);
     } else {
-      throw Exception(
-        response.data?['message'] ?? 'Failed to update profile',
-      );
+      throw Exception(response.data?['message'] ?? 'Failed to update profile');
     }
   }
 
+  /// Upload profile picture only
   @override
   Future<String> uploadProfilePicture(File imageFile) async {
     final token = _userSessionService.getToken();
     if (token == null || token.isEmpty) {
-      throw Exception("No token found");
+      throw Exception("No token found. Please login again.");
     }
 
     final formData = FormData.fromMap({
@@ -70,25 +89,22 @@ class ProfileRemoteDataSource implements IProfileRemoteDataSource {
     });
 
     final response = await _apiClient.dio.post(
-      ApiEndpoints.updateProfile,
+      '${ApiEndpoints.baseUrl}/api/auth/upload-profile-picture',
       data: formData,
       options: Options(
         headers: {
-          'Authorization': 'Bearer $token',
+          'Authorization': 'Bearer $token', // <-- Token added here
+          'Content-Type': 'multipart/form-data',
         },
       ),
     );
 
     if (response.data != null && response.data['success'] == true) {
-      final profilePicture = response.data['data']?['profilePicture'] as String?;
-      if (profilePicture != null) {
-        return profilePicture;
-      }
-      throw Exception('Profile picture URL not returned from server');
+      final url = response.data['data']?['profilePicture'] as String?;
+      if (url != null && url.isNotEmpty) return url;
+      throw Exception('Server did not return profile picture URL');
     } else {
-      throw Exception(
-        response.data?['message'] ?? 'Failed to upload profile picture',
-      );
+      throw Exception(response.data?['message'] ?? 'Failed to upload profile picture');
     }
   }
 }

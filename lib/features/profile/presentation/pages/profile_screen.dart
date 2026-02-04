@@ -12,42 +12,59 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final session = ref.watch(userSessionServiceProvider);
 
-    // Fetch credentials from SharedPreferences
-    final fullName = session.getCurrentUserFullName() ?? "";
-    final email = session.getCurrentUserEmail() ?? "";
-    final phone = session.getCurrentUserPhoneNumber() ?? "";
+    final fullName = session.getCurrentUserFullName() ?? "—";
+    final email = session.getCurrentUserEmail() ?? "—";
+    final phone = session.getCurrentUserPhoneNumber() ?? "—";
     final profilePicPath = session.getCurrentUserProfilePicture();
 
     ImageProvider? profileImage;
     if (profilePicPath != null && profilePicPath.isNotEmpty) {
       final file = File(profilePicPath);
-      if (file.existsSync()) profileImage = FileImage(file);
+      if (file.existsSync()) {
+        profileImage = FileImage(file);
+      }
     }
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("My Profile"),
+        centerTitle: true,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Profile Image
+            // ================= MAIN PROFILE AVATAR =================
             CircleAvatar(
-              radius: 55,
+              radius: 60,
               backgroundColor: Colors.grey.shade300,
               backgroundImage: profileImage,
               child: profileImage == null
-                  ? const Icon(Icons.person, size: 55, color: Colors.white)
+                  ? const Icon(Icons.person, size: 60, color: Colors.white)
                   : null,
             ),
+
+            const SizedBox(height: 14),
+
+            Text(
+              fullName,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+
             const SizedBox(height: 24),
 
-            _profileTile("Full Name",'sabyataKarki'),
+            // ================= PROFILE INFO =================
             _profileTile("Email", email),
-            _profileTile("Phone", '9847378337',),
+            _profileTile("Phone", phone),
             _profileTile("Password", "********"),
 
             const Spacer(),
 
-            // Edit Profile
+            // ================= EDIT PROFILE =================
             SizedBox(
               width: double.infinity,
               height: 50,
@@ -59,52 +76,63 @@ class ProfileScreen extends ConsumerWidget {
                       builder: (_) => const EditProfileScreen(),
                     ),
                   );
-                  // Force rebuild after returning from EditProfileScreen
-                  (context as Element).reassemble();
+
+                  // This forces ProfileScreen to re-read updated session data
+                  ref.invalidate(userSessionServiceProvider);
                 },
-                child: const Text("Edit Profile", style: TextStyle(fontSize: 16)),
+                child: const Text(
+                  "Edit Profile",
+                  style: TextStyle(fontSize: 16),
+                ),
               ),
             ),
 
             const SizedBox(height: 16),
 
-            // Logout Button
+            // ================= LOGOUT =================
             SizedBox(
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                ),
                 onPressed: () async {
                   final confirm = await showDialog<bool>(
                     context: context,
                     builder: (_) => AlertDialog(
-                      title: const Text('Logout'),
-                      content: const Text('Are you sure you want to log out?'),
+                      title: const Text("Logout"),
+                      content:
+                          const Text("Are you sure you want to log out?"),
                       actions: [
                         TextButton(
-                          onPressed: () => Navigator.pop(context, false),
-                          child: const Text('Cancel'),
+                          onPressed: () =>
+                              Navigator.pop(context, false),
+                          child: const Text("Cancel"),
                         ),
                         TextButton(
-                          onPressed: () => Navigator.pop(context, true),
-                          child: const Text('Logout'),
+                          onPressed: () =>
+                              Navigator.pop(context, true),
+                          child: const Text("Logout"),
                         ),
                       ],
                     ),
                   );
 
                   if (confirm == true) {
-                    await session.clearSession(); // Clear SharedPreferences
+                    await session.clearSession();
 
-                    // Navigate back to GetStarted/Login
                     if (!context.mounted) return;
+
                     Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(builder: (_) => const LoginScreen()),
-                      (route) => false,
+                      MaterialPageRoute(
+                        builder: (_) => const LoginScreen(),
+                      ),
+                      (_) => false,
                     );
                   }
                 },
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                 child: const Text("Logout"),
               ),
             ),
@@ -114,10 +142,14 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
+  // ================= PROFILE TILE =================
   Widget _profileTile(String label, String value) {
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 14,
+      ),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey.shade300),
@@ -125,9 +157,23 @@ class ProfileScreen extends ConsumerWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+          Text(
+            label,
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 15,
+            ),
+          ),
           Flexible(
-            child: Text(value, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.grey, fontSize: 14)),
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Colors.grey,
+                fontSize: 14,
+              ),
+            ),
           ),
         ],
       ),

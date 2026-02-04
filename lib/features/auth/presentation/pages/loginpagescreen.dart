@@ -30,21 +30,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final userSession = ref.read(userSessionServiceProvider);
 
     try {
-      final user = await authRemote.login(
+      // Call login API
+      final response = await authRemote.login(
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
 
-      if (user != null) {
-        // Save session
+      if (response != null) {
+        final token = response.token;
+
+        // Save user session with token
         await userSession.saveUserSession(
-          userId: user.id!,
-          email: user.email,
-          fullName: user.fullName,
-          username: user.username,
-         
-        
+          userId: response.id ?? '',
+          email: response.email,
+          fullName: response.fullName ?? '',
+          username: response.username ?? '',
+          phoneNumber: response.phoneNumber,
+          profilePicture: response.profilePicture,
+          token: response.token,
+          
         );
+
+        print('Token saved: ${userSession.getToken()}'); // Debug
 
         SnackbarUtils.showSuccess(context, "Login successful");
 

@@ -1,15 +1,15 @@
 import 'dart:io';
-
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mini_grocery/core/error/failures.dart';
 import 'package:mini_grocery/core/services/connectivity/network_info.dart';
-import 'package:mini_grocery/features/profile/data/datasources/profile_datasource.dart';
-import 'package:mini_grocery/features/profile/data/datasources/remote/profile_remote_datasource_impl.dart';
+import 'package:mini_grocery/features/profile/data/datasources/profile_datasource.dart'; // interface
+import 'package:mini_grocery/features/profile/data/datasources/remote/profile_remote_datasource_impl.dart'; // implementation for provider
 import 'package:mini_grocery/features/profile/data/models/profile_api_model.dart';
 import 'package:mini_grocery/features/profile/domain/entities/profile_entity.dart';
 import 'package:mini_grocery/features/profile/domain/repositories/profile_repository.dart';
+
 
 final profileRepositoryProvider = Provider<IProfileRepository>((ref) {
   final remoteDataSource = ref.read(profileRemoteDataSourceProvider);

@@ -13,6 +13,6 @@ abstract class IProfileLocalDataSource {
 
 /// Remote datasource interface
 abstract class IProfileRemoteDataSource {
-  Future<ProfileApiModel> updateProfile(ProfileApiModel profile);
+  Future<ProfileApiModel> updateProfile(ProfileApiModel profile, {File? imageFile});
   Future<String> uploadProfilePicture(File imageFile);
 }
