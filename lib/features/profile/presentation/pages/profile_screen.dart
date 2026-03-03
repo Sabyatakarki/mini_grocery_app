@@ -1,8 +1,8 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mini_grocery/core/services/storage/user_session_service.dart';
 import 'package:mini_grocery/features/auth/presentation/pages/loginpagescreen.dart';
+import 'package:mini_grocery/features/profile/presentation/providers/user_profile_provider.dart';
 import 'edit_profile.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -10,19 +10,20 @@ class ProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final session = ref.watch(userSessionServiceProvider);
+    // Listen to reactive provider, not session
+    final profile = ref.watch(userProfileProvider);
 
-    final fullName = session.getCurrentUserFullName() ?? "—";
-    final email = session.getCurrentUserEmail() ?? "—";
-    final phone = session.getCurrentUserPhoneNumber() ?? "—";
-    final profilePicPath = session.getCurrentUserProfilePicture();
+    final fullName = profile?.fullName ?? "—";
+    final email = profile?.email ?? "—";
+    final phone = profile?.phoneNumber ?? "—";
+    final profilePic = profile?.profilePicture;
 
     ImageProvider? profileImage;
-    if (profilePicPath != null && profilePicPath.isNotEmpty) {
-      final file = File(profilePicPath);
-      if (file.existsSync()) {
-        profileImage = FileImage(file);
-      }
+    if (profilePic != null && profilePic.isNotEmpty) {
+      
+      profileImage = NetworkImage(
+        "$profilePic?v=${DateTime.now().millisecondsSinceEpoch}",
+      );
     }
 
     return Scaffold(
@@ -70,15 +71,13 @@ class ProfileScreen extends ConsumerWidget {
               height: 50,
               child: ElevatedButton(
                 onPressed: () async {
+                  // Navigate to EditProfileScreen
                   await Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (_) => const EditProfileScreen(),
                     ),
                   );
-
-                  // This forces ProfileScreen to re-read updated session data
-                  ref.invalidate(userSessionServiceProvider);
                 },
                 child: const Text(
                   "Edit Profile",
@@ -106,13 +105,11 @@ class ProfileScreen extends ConsumerWidget {
                           const Text("Are you sure you want to log out?"),
                       actions: [
                         TextButton(
-                          onPressed: () =>
-                              Navigator.pop(context, false),
+                          onPressed: () => Navigator.pop(context, false),
                           child: const Text("Cancel"),
                         ),
                         TextButton(
-                          onPressed: () =>
-                              Navigator.pop(context, true),
+                          onPressed: () => Navigator.pop(context, true),
                           child: const Text("Logout"),
                         ),
                       ],
@@ -120,6 +117,9 @@ class ProfileScreen extends ConsumerWidget {
                   );
 
                   if (confirm == true) {
+                    // 🔹 Clear session
+                    final session =
+                        ref.read(userSessionServiceProvider);
                     await session.clearSession();
 
                     if (!context.mounted) return;

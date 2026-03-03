@@ -23,42 +23,31 @@ class AuthApiModel {
 
   /// Convert API JSON → Model
   factory AuthApiModel.fromJson(Map<String, dynamic> json) {
-    // Compute fullName
-    final firstName = json['firstName'] as String?;
-    final lastName = json['lastName'] as String?;
+    // ✅ token comes from top-level JSON
+    final token = json['token'] as String?;
 
-    String computedFullName;
-    if (json['fullName'] != null) {
-      computedFullName = json['fullName'];
-    } else if (firstName != null || lastName != null) {
-      computedFullName = '${firstName ?? ''} ${lastName ?? ''}'.trim();
-    } else {
-      computedFullName = '';
-    }
+    // user info is inside `data`
+    final data = json['data'] ?? {};
 
-    // token might come at top-level or inside data object
-    String? token;
-    if (json.containsKey('token')) {
-      token = json['token'];
-    } else if (json['data'] != null && json['data']['token'] != null) {
-      token = json['data']['token'];
-    }
-
-    // main data object
-    final data = json['data'] ?? json;
+    final fullName = data['fullName'] ?? '';
+    final email = data['email'] ?? '';
+    final username = data['username'] ?? '';
+    final id = data['_id'] ?? '';
+    final phoneNumber = data['phoneNumber'];
+    final profilePicture = data['profilePicture'];
 
     return AuthApiModel(
-      id: data['_id'] ?? data['id'] ?? data['userId'],
-      fullName: computedFullName,
-      email: data['email'] ?? '',
-      username: data['username'] ?? '',
-      phoneNumber: data['phoneNumber'],
+      id: id,
+      fullName: fullName,
+      email: email,
+      username: username,
+      phoneNumber: phoneNumber,
       token: token,
-      profilePicture: data['profilePicture'],
+      profilePicture: profilePicture,
     );
   }
 
-  /// Model → API request
+  /// Model → API request (Signup/Login)
   Map<String, dynamic> toJson({String? confirmPassword}) {
     return {
       "fullName": fullName,
@@ -70,7 +59,7 @@ class AuthApiModel {
     };
   }
 
-  /// Model → Domain Entity
+  /// Convert Model → Domain Entity
   AuthEntity toEntity() {
     return AuthEntity(
       authId: id,
@@ -84,7 +73,7 @@ class AuthApiModel {
     );
   }
 
-  /// Entity → Model
+  /// Convert Domain Entity → Model
   factory AuthApiModel.fromEntity(AuthEntity entity) {
     return AuthApiModel(
       id: entity.authId,

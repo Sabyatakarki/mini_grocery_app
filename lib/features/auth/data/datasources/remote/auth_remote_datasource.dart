@@ -8,7 +8,7 @@ import 'package:mini_grocery/core/services/storage/user_session_service.dart';
 import 'package:mini_grocery/features/auth/data/datasources/auth_datasource.dart';
 import 'package:mini_grocery/features/auth/data/models/auth_api_model.dart';
 
-// Provider for remote datasource
+/// Provider
 final authRemoteDatasourceProvider = Provider<IAuthRemoteDataSource>((ref) {
   return AuthRemoteDatasource(
     apiClient: ref.read(apiClientProvider),
@@ -16,8 +16,7 @@ final authRemoteDatasourceProvider = Provider<IAuthRemoteDataSource>((ref) {
   );
 });
 
-
-// Remote datasource implementation
+/// Remote Datasource Implementation
 class AuthRemoteDatasource implements IAuthRemoteDataSource {
   final ApiClient _apiClient;
   final UserSessionService _userSessionService;
@@ -28,30 +27,42 @@ class AuthRemoteDatasource implements IAuthRemoteDataSource {
   })  : _apiClient = apiClient,
         _userSessionService = userSessionService;
 
+  // ================= LOGIN =================
   @override
   Future<AuthApiModel?> login(String email, String password) async {
     final response = await _apiClient.post(
       ApiEndpoints.login,
-      data: {'email': email, 'password': password},
+      data: {
+        'email': email,
+        'password': password,
+      },
     );
 
     if (response.data['success'] == true) {
-      final data = response.data['data'] as Map<String, dynamic>;
-      final user = AuthApiModel.fromJson(data);
+      /// ✅ VERY IMPORTANT
+      /// Pass FULL response so token can be read
+      final user = AuthApiModel.fromJson(response.data);
 
-      // Save session
+      /// Debug (remove later)
+      print('LOGIN TOKEN => ${user.token}');
+
+      /// Save session WITH TOKEN
       await _userSessionService.saveUserSession(
         userId: user.id!,
         email: user.email,
         fullName: user.fullName,
         username: user.username,
+        phoneNumber: user.phoneNumber,
+        profilePicture: user.profilePicture,
         token: user.token,
       );
 
-      return AuthApiModel.fromEntity(user.toEntity());
+      return user;
     }
+
     return null;
   }
+
 
   @override
   Future<AuthApiModel> register(AuthApiModel user) async {
@@ -61,50 +72,47 @@ class AuthRemoteDatasource implements IAuthRemoteDataSource {
     );
 
     if (response.data['success'] == true) {
-      final data = response.data['data'] as Map<String, dynamic>;
-      final registeredUser = AuthApiModel.fromJson(data);
-
-      return AuthApiModel.fromEntity(registeredUser.toEntity());
+      return AuthApiModel.fromJson(response.data);
     }
 
-    // fallback in case signup fails
-    return AuthApiModel.fromEntity(user.toEntity());
+    throw Exception(response.data['message'] ?? 'Registration failed');
   }
 
-    // ================= UPDATE PROFILE (IMAGE) =================
   @override
   Future<void> uploadProfileImage(String userId, File image) async {
-  final token = _userSessionService.getToken();
-  if (token == null || token.isEmpty) {
-    throw Exception("No token found");
+    final token = _userSessionService.getToken();
+
+    if (token == null || token.isEmpty) {
+      throw Exception('No token found. Please login again.');
+    }
+
+    final formData = FormData.fromMap({
+      'profilePicture': await MultipartFile.fromFile(
+        image.path,
+        filename: image.path.split('/').last,
+      ),
+    });
+
+    final response = await _apiClient.put(
+      ApiEndpoints.updateProfile,
+      data: formData,
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'multipart/form-data',
+        },
+      ),
+    );
+
+    if (response.data['success'] != true) {
+      throw Exception(response.data['message'] ?? 'Image upload failed');
+    }
   }
 
-  final formData = FormData.fromMap({
-    'profilePicture': await MultipartFile.fromFile(
-      image.path,
-      filename: image.path.split('/').last,
-    ),
-  });
-
-  final response = await _apiClient.put(
-    ApiEndpoints.updateProfile,
-    data: formData,
-    options: Options(
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        'Authorization': 'Bearer $token', 
-      },
-    ),
-  );
-
-  if (response.data['success'] != true) {
-    throw Exception(response.data['message'] ?? 'Upload failed');
-  }
-}
 
   @override
-  Future<AuthApiModel?> getUserById(String authId) {
-   
+  Future<AuthApiModel?> getUserById(String authId) async {
+    // Not implemented yet
     throw UnimplementedError();
   }
 }

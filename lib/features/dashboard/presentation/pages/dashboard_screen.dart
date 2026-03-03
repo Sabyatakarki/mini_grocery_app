@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mini_grocery/features/dashboard/presentation/pages/cart_screen.dart';
-import 'package:mini_grocery/features/dashboard/presentation/pages/categories.dart';
-import 'package:mini_grocery/features/dashboard/presentation/pages/home_screen.dart';
+import 'package:mini_grocery/features/product/presentation/pages/categories_screen.dart';
+import 'package:mini_grocery/features/product/presentation/pages/home_screen.dart';
 import 'package:mini_grocery/features/profile/presentation/pages/profile_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -16,7 +16,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   final List<Widget> screens = const [
     HomeScreen(),
-    Categories(),
+    CategoriesScreen(),
     CartScreen(),
     ProfileScreen(),
   ];

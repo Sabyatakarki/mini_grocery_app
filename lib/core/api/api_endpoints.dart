@@ -26,6 +26,7 @@ class ApiEndpoints {
   // Auth endpoints
   static const String login = '/api/auth/login';
   static const String register = '/api/auth/register';
+  static const String products = '/api/products';
   // Fixed: function to include userId
   static String updateProfile = '/api/auth/update-profile';
 }
