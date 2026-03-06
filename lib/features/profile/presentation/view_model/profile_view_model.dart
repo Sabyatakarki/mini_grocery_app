@@ -18,11 +18,9 @@ class ProfileViewModel extends Notifier<ProfileState> {
 
   @override
   ProfileState build() {
-    // Initialize services here
     _remoteDataSource = ref.read(profileRemoteDataSourceProvider);
     _userSessionService = ref.read(userSessionServiceProvider);
 
-    // Build initial profile from session
     final profile = ProfileEntity(
       userId: _userSessionService.getCurrentUserId() ?? '',
       fullName: _userSessionService.getCurrentUserFullName() ?? '',
@@ -65,12 +63,14 @@ class ProfileViewModel extends Notifier<ProfileState> {
     );
 
     try {
+      final didChangeImage = state.pickedImage != null;
+
       final result = await _remoteDataSource.updateProfile(
         updatedProfile,
         imageFile: state.pickedImage,
       );
 
-      // save to session
+      // Save to session
       await _userSessionService.saveUserSession(
         userId: _userSessionService.getCurrentUserId() ?? '',
         fullName: result.fullName ?? '',
@@ -90,9 +90,10 @@ class ProfileViewModel extends Notifier<ProfileState> {
           profilePicture: result.profilePicture,
         ),
         pickedImage: null,
-      );
 
-      
+        /// ✅ refresh only when image was changed
+        imageVersion: didChangeImage ? state.imageVersion + 1 : state.imageVersion,
+      );
     } catch (e) {
       state = state.copyWith(
         status: ProfileStatus.error,

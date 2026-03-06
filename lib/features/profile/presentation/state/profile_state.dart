@@ -12,12 +12,16 @@ class ProfileState extends Equatable {
   final bool isUploadingImage;
   final String? errorMessage;
 
+  /// ✅ bump this when image changes to refresh NetworkImage cache
+  final int imageVersion;
+
   const ProfileState({
     this.status = ProfileStatus.initial,
     this.profile,
     this.pickedImage,
     this.isUploadingImage = false,
     this.errorMessage,
+    this.imageVersion = 0,
   });
 
   ProfileState copyWith({
@@ -26,6 +30,7 @@ class ProfileState extends Equatable {
     File? pickedImage,
     bool? isUploadingImage,
     String? errorMessage,
+    int? imageVersion,
   }) {
     return ProfileState(
       status: status ?? this.status,
@@ -33,9 +38,17 @@ class ProfileState extends Equatable {
       pickedImage: pickedImage ?? this.pickedImage,
       isUploadingImage: isUploadingImage ?? this.isUploadingImage,
       errorMessage: errorMessage ?? this.errorMessage,
+      imageVersion: imageVersion ?? this.imageVersion,
     );
   }
 
   @override
-  List<Object?> get props => [status, profile, pickedImage, isUploadingImage, errorMessage];
+  List<Object?> get props => [
+        status,
+        profile,
+        pickedImage,
+        isUploadingImage,
+        errorMessage,
+        imageVersion,
+      ];
 }

@@ -7,7 +7,11 @@ class ProfileApiModel {
   final String email;
   final String username;
   final String? phoneNumber;
+
+  /// This will hold the image path/url returned by backend.
+  /// Your backend returns it as `imageUrl`, not `profilePicture`.
   final String? profilePicture;
+
   final File? profilePictureFile; // used when uploading new image
 
   ProfileApiModel({
@@ -28,40 +32,45 @@ class ProfileApiModel {
     String? computedFullName;
 
     if (json['fullName'] != null) {
-      computedFullName = json['fullName'];
+      computedFullName = json['fullName']?.toString();
     } else if (firstName != null || lastName != null) {
-      computedFullName =
-          '${firstName ?? ''} ${lastName ?? ''}'.trim();
+      computedFullName = '${firstName ?? ''} ${lastName ?? ''}'.trim();
     } else {
       computedFullName = null;
     }
 
     return ProfileApiModel(
-      userId: json['_id'] ?? json['userId'],
+      userId: (json['_id'] ?? json['userId'])?.toString(),
       fullName: computedFullName,
-      email: json['email'] ?? '',
-      username: json['username'] ?? '',
-      phoneNumber: json['phoneNumber'],
-      profilePicture: json['profilePicture'],
+      email: (json['email'] ?? '').toString(),
+      username: (json['username'] ?? '').toString(),
+      phoneNumber: json['phoneNumber']?.toString(),
+
+      // ✅ IMPORTANT FIX:
+      // Backend returns: "imageUrl": "/public/profile_pictures/xxx.jpg"
+      // Some backends may return "profilePicture". Support both.
+      profilePicture: (json['profilePicture'] ?? json['imageUrl'])?.toString(),
     );
   }
 
   // ───────────── TO JSON ─────────────
   Map<String, dynamic> toJson({bool includeImageFile = false}) {
-    final nameParts = (fullName ?? '').split(' ');
+    final nameParts = (fullName ?? '').trim().split(RegExp(r'\s+'));
     final firstName = nameParts.isNotEmpty ? nameParts.first : '';
     final lastName =
         nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
 
-    final data = {
+    final data = <String, dynamic>{
       "firstName": firstName,
       "lastName": lastName,
       "email": email,
       "username": username,
-      "phoneNumber": phoneNumber,
+      "phoneNumber": phoneNumber ?? '',
     };
 
-    // Include image file only if uploading
+    // Note: For multipart upload you are already attaching the file in RemoteDataSource
+    // under the key "profilePicture". So you typically DON'T need to include path here.
+    // Keeping this only if you use it somewhere else.
     if (includeImageFile && profilePictureFile != null) {
       data['profilePicture'] = profilePictureFile!.path;
     }
@@ -77,7 +86,7 @@ class ProfileApiModel {
       email: email,
       username: username,
       phoneNumber: phoneNumber,
-      profilePicture: profilePicture,
+      profilePicture: profilePicture, // will now contain imageUrl value too
     );
   }
 

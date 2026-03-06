@@ -3,8 +3,8 @@ import 'package:flutter/foundation.dart';
 
 class ApiEndpoints {
   // Configuration
-  static const bool isPhysicalDevice = false;
-  static const String _ipAddress = '192.168.1.1'; // change if needed
+  static const bool isPhysicalDevice = true;
+  static const String _ipAddress = '192.168.1.87'; //'192.168.1.1'; // change if needed
   static const int _port = 5000;
 
   // Host resolver
@@ -27,6 +27,10 @@ class ApiEndpoints {
   static const String login = '/api/auth/login';
   static const String register = '/api/auth/register';
   static const String products = '/api/products';
+
+  // Order endpoints
+  static const String createOrder = '/api/orders';
+  static const String getMyOrders = '/api/orders/my';
   // Fixed: function to include userId
   static String updateProfile = '/api/auth/update-profile';
 }
