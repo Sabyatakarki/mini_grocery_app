@@ -1,5 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mini_grocery/core/sensor/shake_refresh_service.dart';
+import 'package:mini_grocery/features/product/presentation/providers/cart_provider.dart';
+import 'package:sensors_plus/sensors_plus.dart';
 import 'package:mini_grocery/core/api/api_endpoints.dart';
 import 'package:mini_grocery/features/product/presentation/providers/product_provider.dart';
 import 'package:mini_grocery/features/profile/presentation/pages/profile_screen.dart';
@@ -15,6 +20,80 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   String searchQuery = "";
   static final String baseImageUrl = "${ApiEndpoints.baseUrl}/uploads/products/";
 
+  final ShakeRefreshService _shakeRefreshService = ShakeRefreshService();
+  StreamSubscription<AccelerometerEvent>? _flipSubscription;
+
+  DateTime? _lastFlipTime;
+  bool _isFaceDown = false;
+
+  static const double _flipThreshold = -8.0;
+  static const int _flipCooldownMs = 1500;
+
+  @override
+  void initState() {
+    super.initState();
+    _startShakeDetection();
+    _startFlipDetection();
+  }
+
+  void _startShakeDetection() {
+    _shakeRefreshService.start(
+      onShake: () async {
+        ref.invalidate(productProvider);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Menu refreshed"),
+              duration: Duration(seconds: 1),
+            ),
+          );
+        }
+      },
+    );
+  }
+
+  void _startFlipDetection() {
+    _flipSubscription = accelerometerEvents.listen((event) {
+      final now = DateTime.now();
+
+      if (_lastFlipTime != null &&
+          now.difference(_lastFlipTime!).inMilliseconds < _flipCooldownMs) {
+        return;
+      }
+
+      final isNowFaceDown = event.z < _flipThreshold;
+
+      if (isNowFaceDown && !_isFaceDown) {
+        _isFaceDown = true;
+        _lastFlipTime = now;
+        _clearCart();
+      } else if (!isNowFaceDown) {
+        _isFaceDown = false;
+      }
+    });
+  }
+
+  void _clearCart() {
+    ref.read(cartProvider.notifier).clearCart();
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Cart cleared"),
+          duration: Duration(seconds: 1),
+        ),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _shakeRefreshService.dispose();
+    _flipSubscription?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final productsAsync = ref.watch(productProvider);
@@ -23,7 +102,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       backgroundColor: const Color(0xFFF8F9FB),
       appBar: _buildAppBar(context),
       body: productsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator(color: Colors.green)),
+        loading: () => const Center(
+          child: CircularProgressIndicator(color: Colors.green),
+        ),
         error: (err, _) => Center(child: Text("Error: $err")),
         data: (products) {
           final filteredProducts = products
@@ -35,7 +116,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             children: [
               const Text(
                 "Fresh Picks",
-                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.black87),
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
               ),
               const SizedBox(height: 20),
               _buildSearchBar(),
@@ -66,7 +151,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           const SizedBox(width: 4),
           const Text(
             "Kathmandu, Nepal",
-            style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           Icon(Icons.keyboard_arrow_down_rounded, color: Colors.grey[600], size: 18),
         ],
@@ -78,7 +167,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             backgroundColor: Colors.white,
             child: IconButton(
               icon: const Icon(Icons.person_outline, color: Colors.black87),
-              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen())),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ProfileScreen()),
+              ),
             ),
           ),
         ),
@@ -139,23 +231,40 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("Get 40% OFF",
-                      style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
-                  const Text("On your first grocery order",
-                      style: TextStyle(color: Colors.white70, fontSize: 14)),
+                  const Text(
+                    "Get 40% OFF",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Text(
+                    "On your first grocery order",
+                    style: TextStyle(color: Colors.white70, fontSize: 14),
+                  ),
                   const SizedBox(height: 15),
                   ElevatedButton(
                     onPressed: () {},
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orangeAccent,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
-                    child: const Text("Claim Now", style: TextStyle(color: Colors.white)),
+                    child: const Text(
+                      "Claim Now",
+                      style: TextStyle(color: Colors.white),
+                    ),
                   )
                 ],
               ),
             ),
-            Image.asset("assets/images/veggies.png", height: 100, fit: BoxFit.contain),
+            Image.asset(
+              "assets/images/veggies.png",
+              height: 100,
+              fit: BoxFit.contain,
+            ),
           ],
         ),
       ),
@@ -166,8 +275,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        TextButton(onPressed: onSeeAll, child: const Text("See All", style: TextStyle(color: Colors.green))),
+        Text(
+          title,
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        TextButton(
+          onPressed: onSeeAll,
+          child: const Text(
+            "See All",
+            style: TextStyle(color: Colors.green),
+          ),
+        ),
       ],
     );
   }
@@ -179,6 +297,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       {'n': 'Meat', 'i': Icons.kebab_dining, 'c': Colors.orange},
       {'n': 'Dairy', 'i': Icons.emoji_food_beverage, 'c': Colors.blue},
     ];
+
     return SizedBox(
       height: 100,
       child: ListView.builder(
@@ -207,7 +326,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: Icon(icon, color: color, size: 30),
           ),
           const SizedBox(height: 8),
-          Text(name, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+          Text(
+            name,
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+          ),
         ],
       ),
     );
@@ -226,11 +348,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
       itemBuilder: (context, index) {
         final product = products[index];
+
         return Container(
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: Offset(0, 5))],
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 5),
+              )
+            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -239,12 +368,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: Stack(
                   children: [
                     ClipRRect(
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(20),
+                      ),
                       child: Image.network(
                         "$baseImageUrl${product.image}",
                         width: double.infinity,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.image_not_supported)),
+                        errorBuilder: (_, __, ___) => const Center(
+                          child: Icon(Icons.image_not_supported),
+                        ),
                       ),
                     ),
                     Positioned(
@@ -253,9 +386,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       child: CircleAvatar(
                         radius: 15,
                         backgroundColor: Colors.white.withOpacity(0.8),
-                        child: const Icon(Icons.favorite_border, size: 18, color: Colors.red),
+                        child: const Icon(
+                          Icons.favorite_border,
+                          size: 18,
+                          color: Colors.red,
+                        ),
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -264,18 +401,49 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(product.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                    Text(
+                      product.name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                    ),
                     const SizedBox(height: 4),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("Rs ${product.price}",
-                            style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 16)),
-                        Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(8)),
-                          child: const Icon(Icons.add, color: Colors.white, size: 20),
-                        )
+                        Text(
+                          "Rs ${product.price}",
+                          style: const TextStyle(
+                            color: Colors.green,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            ref.read(cartProvider.notifier).addToCart(product);
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text("${product.name} added to cart"),
+                                duration: const Duration(seconds: 1),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Colors.green,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.add,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ],
